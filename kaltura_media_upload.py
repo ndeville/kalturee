@@ -95,7 +95,7 @@ def upload_video_to_kaltura(file_path):
     # media_entry.categoriesIds = "324250232"  # use the Category ID to be found in https://kmc.kaltura.com/index.php/kmcng/content/categories/list
     # media_entry.categories = "324250232"  # use the Category ID to be found in https://kmc.kaltura.com/index.php/kmcng/content/categories/list
     # media_entry.categories = 'MediaSpace>unlisted'  # use the Category ID to be found in https://kmc.kaltura.com/index.php/kmcng/content/categories/list
-    media_entry.categories = 'MediaSpace'  # use the Category ID to be found in https://kmc.kaltura.com/index.php/kmcng/content/categories/list
+    # media_entry.categories = 'MediaSpace'  # use the Category ID to be found in https://kmc.kaltura.com/index.php/kmcng/content/categories/list
     media_entry = client.media.add(media_entry)
     
     # Attach uploaded file to the media entry
@@ -110,8 +110,12 @@ def upload_video_to_kaltura(file_path):
 
 
 # Example usage
-file_path = "/Users/nic/Movies/Recordings/240211-133436.mp4"
-upload_video_to_kaltura(file_path)
+# file_path = "/Users/nic/Movies/Recordings/240211-133436.mp4"
+# upload_video_to_kaltura(file_path)
+
+
+
+
 
 
 
@@ -144,31 +148,31 @@ upload_video_to_kaltura(file_path)
 
 
 
-# from KalturaClient import *
-# from KalturaClient.Plugins.Core import *
+from KalturaClient import *
+from KalturaClient.Plugins.Core import *
 
-# config = KalturaConfiguration()
-# config.serviceUrl = "https://www.kaltura.com/"
-# client = KalturaClient(config)
+config = KalturaConfiguration()
+config.serviceUrl = "https://www.kaltura.com/"
+client = KalturaClient(config)
 
-# adminSecret = MY_ADMIN_SECRET
-# userId = ''  # Can be left empty for admin sessions
-# type = KalturaSessionType.ADMIN  # Specify an admin session
-# partnerId = MY_PARTNER_ID  # Your partner ID
-# expiry = 86400  # Session duration in seconds
-# privileges = ''  # Additional privileges can be specified here
+adminSecret = MY_ADMIN_SECRET
+userId = ''  # Can be left empty for admin sessions
+type = KalturaSessionType.ADMIN  # Specify an admin session
+partnerId = MY_PARTNER_ID  # Your partner ID
+expiry = 86400  # Session duration in seconds
+privileges = ''  # Additional privileges can be specified here
 
-# ks = client.session.start(adminSecret, userId, type, partnerId, expiry, privileges)
-# client.setKs(ks)
+ks = client.session.start(adminSecret, userId, type, partnerId, expiry, privileges)
+client.setKs(ks)
 
-# filter = KalturaCategoryFilter()
-# # filter.fullNameStartsWith = "MediaSpace"  # Adjust as necessary
-# pager = KalturaFilterPager()
+filter = KalturaCategoryFilter()
+# filter.fullNameStartsWith = "MediaSpace"  # Adjust as necessary
+pager = KalturaFilterPager()
 
-# result = client.category.list(filter, pager)
+result = client.category.list(filter, pager)
 
-# for category in result.objects:
-#     print(f"Category ID: {category.id}, Name: {category.name}, Full Name: {category.fullName}")
+for category in result.objects:
+    print(f"Category ID: {category.id}, Name: {category.name}, Full Name: {category.fullName}")
 
 
 
