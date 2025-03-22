@@ -15,11 +15,11 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 ####################
-# SCRIPT_TITLE
+# Download videos from YouTube with yt-dlp
 
 # IMPORTS
 
-# import my_utils
+import my_utils
 # from DB.tools import select_all_records, update_record, create_record, delete_record
 import sqlite3
 
@@ -104,18 +104,31 @@ def download_youtube_video(url, output_path=None, format='mp4'):
 
 # MAIN
 
-# Example usage
-youtube_url = "https://www.youtube.com/watch?v=pYsv9hxGo_0"  # Replace with your desired YouTube URL
-# youtube_url = "https://www.youtube.com/@GlencoreVideos"  # Replace with your desired YouTube URL
-download_folder = "/Users/nic/Downloads/temp"  # Folder to save downloaded videos
+vpn_connection =my_utils.connect_vpn()
 
-# Download the video
-success = download_youtube_video(youtube_url, download_folder)
+print(f"vpn_connection:\t{vpn_connection}")
+print(type(vpn_connection))
 
-if success:
-    print("Download completed successfully!")
+if vpn_connection:
+
+    print(f"✅ Connected to VPN")
+
+    youtube_url = "https://www.youtube.com/watch?v=pYsv9hxGo_0"  # Replace with your desired YouTube URL
+    # youtube_url = "https://www.youtube.com/@GlencoreVideos"  # Replace with your desired YouTube URL
+    download_folder = "/Users/nic/Downloads/temp"  # Folder to save downloaded videos
+
+    # Download the video
+    success = download_youtube_video(youtube_url, download_folder)
+
+    if success:
+        print("\n✅ Download completed successfully!")
+    else:
+        print("\n❌ Download failed.")
+
 else:
-    print("Download failed.")
+    print(f"❌ Failed to connect to VPN")
+
+my_utils.disconnect_vpn()
 
 ########################################################################################################
 
