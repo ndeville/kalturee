@@ -30,7 +30,9 @@ userId = ''
 type = KalturaSessionType.ADMIN  
 partnerId = MY_PARTNER_ID  
 expiry = 86400  
-privileges = 'kms.user=nicolas.deville@kaltura.com'
+privileges = 'disableentitlement'  # Disables entitlement to allow listing all categories
+# Note: 'kms.user=nicolas.deville@kaltura.com' is used for user-specific operations
+# For listing categories, we need to disable entitlement restrictions
 
 ks = client.session.start(adminSecret, userId, type, partnerId, expiry, privileges)
 client.setKs(ks)
@@ -40,18 +42,14 @@ pager = KalturaFilterPager()
 
 result = client.category.list(filter, pager)
 
-print()
+print(f"\n\nPRINTING ONLY CATEGORIES WITHIN KMS CHANNEL:\n")
 
 for category in result.objects:
-    print(f"Category ID: {category.id}, Name: {category.name}, Full Name: {category.fullName}")
+    if category.fullName.startswith("MediaSpace>site>channels"):
+        print(f"{category.id:<15}{category.name:<40}{category.fullName}")
 
 # End Chrono
 run_time = round((time.time() - start_time), 3)
 print(f'\n{os.path.basename(__file__)} finished in {round(run_time*1000)}ms at {datetime.now().strftime("%H:%M:%S")}.\n')
 # print(f'\n{os.path.basename(__file__)} finished in {round(run_time)}s at {datetime.now().strftime("%H:%M:%S")}.\n')
 
-"""
-❌ TODO:
-250322-1301 only returns 1 category (that was created in KMC directly last year.
-Does not return any of the KMS Channels (Categories) created in MediaSpace.
-"""
