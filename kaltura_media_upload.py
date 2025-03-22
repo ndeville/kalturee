@@ -31,7 +31,7 @@ def upload_video_to_kaltura(file_path):
     client = KalturaClient(config)
     
     expiry = 86400
-    privileges = ""
+    privileges = "kms.user=nicolas.deville@kaltura.com"
 
     # Start session
     ks = client.session.start(MY_ADMIN_SECRET, MY_USER_SECRET, KalturaSessionType.ADMIN, MY_PARTNER_ID, expiry, privileges)
