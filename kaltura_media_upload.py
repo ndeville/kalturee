@@ -64,7 +64,7 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
     file_data = open(file_path, "rb")
     
     # Upload the file
-    resume = False
+    resume = False # NOT WORKING when True
     final_chunk = True
     resume_at = -1
     result = client.uploadToken.upload(upload_token.id, file_data, resume, final_chunk, resume_at)
@@ -216,7 +216,7 @@ caption_files = {
     "English": "/Users/nic/Downloads/temp/en.vtt",
     "German": "/Users/nic/Downloads/temp/de.vtt"
 }
-video_title = "Demo Video with Captions"
+video_title = f"Test Video {ts_file}"
 video_description = "This is a demonstration video uploaded with the Kaltura API, featuring multilingual captions and a custom thumbnail."
 
 print(f"\n\nUploading {file_path} to Kaltura with custom title, description, {len(caption_files)} caption files, and a custom thumbnail...")
