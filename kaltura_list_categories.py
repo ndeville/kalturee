@@ -49,3 +49,9 @@ for category in result.objects:
 run_time = round((time.time() - start_time), 3)
 print(f'\n{os.path.basename(__file__)} finished in {round(run_time*1000)}ms at {datetime.now().strftime("%H:%M:%S")}.\n')
 # print(f'\n{os.path.basename(__file__)} finished in {round(run_time)}s at {datetime.now().strftime("%H:%M:%S")}.\n')
+
+"""
+❌ TODO:
+250322-1301 only returns 1 category (that was created in KMC directly last year.
+Does not return any of the KMS Channels (Categories) created in MediaSpace.
+"""

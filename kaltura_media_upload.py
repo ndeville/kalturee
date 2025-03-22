@@ -89,6 +89,7 @@ def upload_video_to_kaltura(file_path):
     media_entry = client.media.addContent(media_entry.id, resource)
     
 
+
     # THUMBNAIL
     try:
         # Create a KalturaUrlResource for the thumbnail
@@ -110,7 +111,8 @@ def upload_video_to_kaltura(file_path):
 
     except Exception as e:
         print(f"❌ Error adding thumbnail: {e}")
-    
+
+
 
     # CATEGORY (add to a Category so it appears in KMS Channel)
     category_entry = KalturaCategoryEntry()
@@ -124,6 +126,9 @@ def upload_video_to_kaltura(file_path):
         print(f"Error adding to category: {e}")
     
     print(f"\n✅ Upload successful of test_video_{ts_file}: https://nicolas.mediaspace.kaltura.com/media/{media_entry.id}")
+
+    # 250322-1303 ❌ THIS fails still to add to Category for it to appear in KMS Channel.
+
 
     file_data.close()
 
