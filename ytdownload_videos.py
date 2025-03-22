@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 ts_db = f"{datetime.now().strftime('%Y-%m-%d %H:%M')}"
 ts_time = f"{datetime.now().strftime('%H:%M:%S')}"
+ts_folder = f"{datetime.now().strftime('%y%m%d%H%M')}"
 print(f"\n---------- {ts_time} starting {os.path.basename(__file__)}")
 import time
 start_time = time.time()
@@ -80,6 +81,26 @@ def download_youtube_video(url, output_path=None, format='mp4'):
             
             # Convert webp thumbnail to jpg
             webp_files = glob.glob(os.path.join(output_path, f"{video_title}*.webp"))
+            
+            # If no files found with the exact title match, try a more flexible approach
+            if not webp_files:
+                # Look for any webp files that might have been created recently
+                webp_files = glob.glob(os.path.join(output_path, "*.webp"))
+                
+                # Alternative: use the info dict to get the exact filename
+                if 'thumbnails' in info and info['thumbnails']:
+                    for thumb in info['thumbnails']:
+                        if 'filename' in thumb:
+                            potential_file = os.path.join(output_path, thumb['filename'])
+                            if os.path.exists(potential_file) and potential_file.endswith('.webp'):
+                                webp_files.append(potential_file)
+            
+            if webp_files:
+                if verbose:
+                    print(f"Found {len(webp_files)} webp thumbnails to convert")
+            else:
+                print("No webp thumbnails found to convert")
+                
             for webp_file in webp_files:
                 try:
                     jpg_file = webp_file.replace('.webp', '.jpg')
@@ -102,38 +123,65 @@ def download_youtube_video(url, output_path=None, format='mp4'):
         print(f"Error downloading video: {e}")
         return False
 
+def process_youtube_url_to_download(youtube_url=None):
+    """
+    Main function to download YouTube videos
+    
+    Args:
+        youtube_url (str, optional): YouTube URL to download, defaults to a specific playlist
+        
+    Returns:
+        str: Path to the folder where videos were downloaded
+    """
+    # Create a timestamped folder for this run
+    download_path = os.path.join("/Users/nic/Movies/Youtube", ts_folder)
+    os.makedirs(download_path, exist_ok=True)
+    
+    print(f"\nℹ️  Files will be saved to: {download_path}")
+    
+    vpn_connection = my_utils.connect_vpn()
+    
+    print(f"vpn_connection:\t{vpn_connection}")
+    print(type(vpn_connection))
+    
+    if vpn_connection:
+        print(f"✅ Connected to VPN")
+        
+        # Use the timestamped folder
+        download_folder = download_path
+        
+        # Download the video
+        success = download_youtube_video(youtube_url, download_folder)
+        
+        if success:
+            print(f"\n✅ Download completed successfully! Files saved to {download_folder}")
+        else:
+            print("\n❌ Download failed.")
+        
+    else:
+        print(f"❌ Failed to connect to VPN")
+    
+    my_utils.disconnect_vpn()
+    
+    return download_path
+
 # MAIN
 
-vpn_connection =my_utils.connect_vpn()
-
-print(f"vpn_connection:\t{vpn_connection}")
-print(type(vpn_connection))
-
-if vpn_connection:
-
-    print(f"✅ Connected to VPN")
-
-    youtube_url = "https://www.youtube.com/watch?v=pYsv9hxGo_0"  # Replace with your desired YouTube URL
-    # youtube_url = "https://www.youtube.com/@GlencoreVideos"  # Replace with your desired YouTube URL
-    download_folder = "/Users/nic/Downloads/temp"  # Folder to save downloaded videos
-
-    # Download the video
-    success = download_youtube_video(youtube_url, download_folder)
-
-    if success:
-        print("\n✅ Download completed successfully!")
-    else:
-        print("\n❌ Download failed.")
-
-else:
-    print(f"❌ Failed to connect to VPN")
-
-my_utils.disconnect_vpn()
-
-########################################################################################################
-
 if __name__ == '__main__':
-    print('\n\n-------------------------------')
+
+    # youtube_url = "https://www.youtube.com/watch?v=pYsv9hxGo_0"
+    # youtube_url = "https://www.youtube.com/@GlencoreVideos"
+    youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe"
+
+
+
+    process_youtube_url_to_download(youtube_url)
+
+
+
+
+
+    # print('\n\n-------------------------------')
     # print(f"\ncount_row:\t{count_row:,}")
     # print(f"count_total:\t{count_total:,}")
     # print(f"count:\t\t{count:,}")

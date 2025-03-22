@@ -1,50 +1,3 @@
-# # Process yt-dlp JSON metadata files
-
-# import json
-# import sys
-# import os
-
-
-# def extract_subtitle_urls(json_file):
-#     """
-#     Extract subtitle URLs from a yt-dlp JSON metadata file
-#     Returns a dictionary mapping language codes to VTT subtitle URLs
-#     """
-#     # Load the JSON file
-#     with open(json_file, 'r', encoding='utf-8') as f:
-#         data = json.load(f)
-    
-#     # Initialize the subtitle dictionary
-#     subtitle_dict = {}
-    
-#     # Check if the 'requested_subtitles' field exists
-#     if 'requested_subtitles' in data:
-#         for lang, subtitle_info in data['requested_subtitles'].items():
-#             if 'url' in subtitle_info:
-#                 subtitle_dict[lang] = subtitle_info['url']
-    
-#     # Alternative approach: check 'subtitles' field which might contain all available subtitles
-#     elif 'subtitles' in data:
-#         for lang, subtitle_formats in data['subtitles'].items():
-#             # Find VTT format if available
-#             for fmt in subtitle_formats:
-#                 if fmt.get('ext') == 'vtt':
-#                     subtitle_dict[lang] = fmt.get('url')
-#                     break
-    
-#     return subtitle_dict
-
-
-# json_file = "/Users/nic/Python/kalturee/yt_test.json"
-    
-    
-# # Extract subtitle URLs
-# subtitle_dict = extract_subtitle_urls(json_file)
-
-# # Print the resulting dictionary
-# print(json.dumps(subtitle_dict, indent=2, ensure_ascii=False))
-
-
 import my_utils
 
 my_utils.connect_vpn()
@@ -52,6 +5,8 @@ my_utils.connect_vpn()
 import json
 import requests
 import os
+import random
+import time
 
 # Load the JSON file
 json_path = "/Users/nic/Python/kalturee/yt_test.json" 
@@ -86,6 +41,12 @@ for entry in vtt_urls:
         print(f"✅ Downloaded: {filename}")
     else:
         print(f"❌ Failed to download {entry['language']} subtitle: {response.status_code}")
+    
+    # Add random delay between downloads (2-5 seconds)
+    if entry != vtt_urls[-1]:  # Skip delay after the last download
+        delay = random.uniform(2, 5)
+        print(f"Waiting {delay:.2f} seconds before next download...")
+        time.sleep(delay)
 
 print(f"Downloaded VTT files saved to: {download_dir}")
 
