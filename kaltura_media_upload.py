@@ -70,14 +70,16 @@ def upload_video_to_kaltura(file_path):
     # media_entry.categories = 374334092 # NOT WORKING
     # media_entry.categories = "MediaSpace/site/channels/test_250322-0047" # NOT WORKING
     # NONE OF THE ABOVE WORK. TRYING WITH OTHER APPROACH BELOW AFTER ADDING MEDIA ENTRY.
+    # TODO: Figure out how to add to Category for it to appear in KMS Channel.
 
     media_entry.flavorParamsIds = "25350252"  # Convert to string to avoid type issues
     media_entry.name = f"test_video_{ts_file}"
     media_entry.description = f"I'm adding this description to the video."
     
     # Thumbnail / Use ID 1_oq7trpiz for tests
-    media_entry.thumbnailUrl = "1_oq7trpiz"
-
+    # We'll add the thumbnail after the media entry is created
+    # The thumbnailUrl approach doesn't work, so we'll use thumbAsset.add instead
+    
     # Add the media entry
     media_entry = client.media.add(media_entry)
     
@@ -85,6 +87,28 @@ def upload_video_to_kaltura(file_path):
     resource = KalturaUploadedFileTokenResource()
     resource.token = upload_token.id
     media_entry = client.media.addContent(media_entry.id, resource)
+    
+    # Add thumbnail to the media entry
+    try:
+        # Create a KalturaUrlResource for the thumbnail
+        thumb_resource = KalturaUrlResource()
+        thumb_resource.url = "https://www.kaltura.com/p/{}/sp/{}/thumbnail/entry_id/1_oq7trpiz/width/640/height/360".format(MY_PARTNER_ID, MY_PARTNER_ID)
+        
+        # Create a new thumbAsset
+        thumb_asset = KalturaThumbAsset()
+        
+        # Add the thumbnail to the media entry
+        result_thumb = client.thumbAsset.add(media_entry.id, thumb_asset)
+        
+        # Set the content of the thumbnail
+        client.thumbAsset.setContent(result_thumb.id, thumb_resource)
+        
+        print(f"✅ Successfully added thumbnail to media entry")
+
+        # TODO: thumbnail gets uploaded but not set as default to media entry.
+
+    except Exception as e:
+        print(f"❌ Error adding thumbnail: {e}")
     
     # Category (add to a Category so it appears in KMS Channel)
     category_entry = KalturaCategoryEntry()
