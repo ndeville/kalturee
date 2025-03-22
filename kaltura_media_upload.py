@@ -25,7 +25,7 @@ from KalturaClient.Plugins.Caption import *
 from KalturaClient.Plugins.Caption import KalturaLanguage, KalturaCaptionAsset, KalturaCaptionType
 
 # Upload to Kaltura
-def upload_video_to_kaltura(file_path, title=None, description=None, caption_files=None, thumbnail_file_path=None):
+def upload_video_to_kaltura(file_path, title=None, description=None, caption_files=None, thumbnail_file_path=None, channel_id=None):
     """
     Upload a video to Kaltura with optional caption files and thumbnail
     
@@ -37,6 +37,7 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
                                        and file path as value. Example:
                                        {"English": "/path/to/en.vtt", "German": "/path/to/de.vtt"}
         thumbnail_file_path (str, optional): Path to the thumbnail image file
+        channel_id (int, optional): Kaltura category ID (channel). Defaults to 374334092
     """
     global MY_USER_SECRET, MY_ADMIN_SECRET, MY_PARTNER_ID
 
@@ -183,11 +184,11 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
     # ✅ CATEGORY (add to a Category so it appears in KMS Channel)
     category_entry = KalturaCategoryEntry()
     category_entry.entryId = media_entry.id
-    category_entry.categoryId = 374334092
+    category_entry.categoryId = channel_id
     
     try:
         client.categoryEntry.add(category_entry)
-        print(f"✅ Successfully added entry to category ID: 374334092")
+        print(f"✅ Successfully added entry to category ID: {channel_id}")
     except Exception as e:
         print(f"❌ Error adding to category: {e}")
     
@@ -209,8 +210,10 @@ caption_files = {
 video_title = f"Test Video {ts_file}"
 video_description = "This is a demonstration video uploaded with the Kaltura API, featuring multilingual captions and a custom thumbnail."
 
+channel_id = 374334092
+
 print(f"\n\nUploading {file_path} to Kaltura with custom title, description, {len(caption_files)} caption files, and a custom thumbnail...")
-upload_video_to_kaltura(file_path, video_title, video_description, caption_files, thumbnail_file_path)
+upload_video_to_kaltura(file_path, video_title, video_description, caption_files, thumbnail_file_path, channel_id)
 
 # End Chrono
 run_time = round((time.time() - start_time), 3)
