@@ -77,20 +77,6 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
     # Reference ID
     media_entry.referenceId = "auto-" + datetime.now().strftime('%Y%m%d%H%M%S')  # Add a reference ID 
     
-    # ❌ CATEGORY (add to a Category so it appears in KMS Channel)
-    # Use the Category ID to be found in https://kmc.kaltura.com/index.php/kmcng/content/categories/list
-    # media_entry.categories = "test_250322-0047" # NOT WORKING
-    # media_entry.categoriesIds = "374334092"  # NOT WORKING. ID for test_250322-0047 channel. KalturaClient.exceptions.KalturaException: Category id "374334092" not found (CATEGORY_NOT_FOUND)
-    # media_entry.categoriesIds = 374334092  # NOT WORKING. ID for test_250322-0047 channel. KalturaClient.exceptions.KalturaException: Category id "374334092" not found (CATEGORY_NOT_FOUND)
-    # media_entry.categories = "MediaSpace/site/channels/Test" # NOT WORKING
-    # media_entry.categories = "MediaSpace>site>channels>Test" # NOT WORKING
-    # media_entry.categories = "Test" # NOT WORKING
-    # media_entry.categories = "374334092" # NOT WORKING
-    # media_entry.categories = 374334092 # NOT WORKING
-    # media_entry.categories = "MediaSpace/site/channels/test_250322-0047" # NOT WORKING
-    # NONE OF THE ABOVE WORK. TRYING WITH OTHER APPROACH BELOW AFTER ADDING MEDIA ENTRY.
-    # TODO: Figure out how to add to Category for it to appear in KMS Channel / See below for other approach.
-
     # ✅ FLAVOURS
     media_entry.flavorParamsIds = "25350252"
 
@@ -105,6 +91,10 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
         media_entry.description = description
     else:
         media_entry.description = "Video uploaded via Kaltura API"
+    
+    # Set creator and owner information (CRITICAL for media entry to be visible in KMS)
+    media_entry.userId = "nicolas.deville@kaltura.com"
+    media_entry.creatorId = "nicolas.deville@kaltura.com"
     
     # ADD THE MEDIA ENTRY
     media_entry = client.media.add(media_entry)
@@ -190,7 +180,7 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
             except Exception as e:
                 print(f"❌ Error adding {language} caption: {e}")
 
-    # ❌ CATEGORY (add to a Category so it appears in KMS Channel)
+    # ✅ CATEGORY (add to a Category so it appears in KMS Channel)
     category_entry = KalturaCategoryEntry()
     category_entry.entryId = media_entry.id
     category_entry.categoryId = 374334092
