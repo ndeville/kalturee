@@ -1,5 +1,13 @@
 """UPLOAD SINGLE VIDEO FILE TO KALTURA"""
 
+""""
+TODO:
+- force the reconvert to HD/720 - WEB (H264/2500) as transcoding always fails?
+- add chapters
+- add tags
+
+"""
+
 from datetime import datetime
 import os
 ts_time = f"{datetime.now().strftime('%H:%M:%S')}"
@@ -78,8 +86,8 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
     # Reference ID
     media_entry.referenceId = "auto-" + datetime.now().strftime('%Y%m%d%H%M%S')  # Add a reference ID 
     
-    # ✅ FLAVOURS
-    media_entry.flavorParamsIds = "25350252"
+    # # ✅ FLAVOURS
+    # media_entry.flavorParamsIds = "25350252"
 
     # ✅ NAME
     if title:
@@ -201,7 +209,7 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
 if __name__ == "__main__":
 
     file_path = "/Users/nic/Downloads/temp/test_video.mp4"
-    thumbnail_file_path = "/Users/nic/Downloads/temp/thumbnail.jpg"
+    thumbnail_file_path = "/Users/nic/Downloads/temp/thumbnail2.jpg"
     caption_files = {
         "English": "/Users/nic/Downloads/temp/en.vtt",
         "German": "/Users/nic/Downloads/temp/de.vtt"

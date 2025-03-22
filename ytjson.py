@@ -45,7 +45,9 @@
 # print(json.dumps(subtitle_dict, indent=2, ensure_ascii=False))
 
 
+import my_utils
 
+my_utils.connect_vpn()
 
 import json
 import requests
@@ -75,12 +77,16 @@ for entry in vtt_urls:
     filepath = os.path.join(download_dir, filename)
     
     # Download the VTT file
-    response = requests.get(entry['url'])
+    url = entry['url']
+    print(f"\nDownloading {url}")
+    response = requests.get(url)
     if response.status_code == 200:
         with open(filepath, 'wb') as f:
             f.write(response.content)
-        print(f"Downloaded: {filename}")
+        print(f"✅ Downloaded: {filename}")
     else:
-        print(f"Failed to download {entry['language']} subtitle: {response.status_code}")
+        print(f"❌ Failed to download {entry['language']} subtitle: {response.status_code}")
 
 print(f"Downloaded VTT files saved to: {download_dir}")
+
+my_utils.disconnect_vpn()
