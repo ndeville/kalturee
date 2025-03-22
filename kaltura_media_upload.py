@@ -198,23 +198,22 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
 
 
 
+if __name__ == "__main__":
 
+    file_path = "/Users/nic/Downloads/temp/test_video.mp4"
+    thumbnail_file_path = "/Users/nic/Downloads/temp/thumbnail.jpg"
+    caption_files = {
+        "English": "/Users/nic/Downloads/temp/en.vtt",
+        "German": "/Users/nic/Downloads/temp/de.vtt"
+    }
+    video_title = f"Test Video {ts_file}"
+    video_description = "This is a demonstration video uploaded with the Kaltura API, featuring multilingual captions and a custom thumbnail."
 
+    channel_id = 374334092
 
-file_path = "/Users/nic/Downloads/temp/test_video.mp4"
-thumbnail_file_path = "/Users/nic/Downloads/temp/thumbnail.jpg"
-caption_files = {
-    "English": "/Users/nic/Downloads/temp/en.vtt",
-    "German": "/Users/nic/Downloads/temp/de.vtt"
-}
-video_title = f"Test Video {ts_file}"
-video_description = "This is a demonstration video uploaded with the Kaltura API, featuring multilingual captions and a custom thumbnail."
+    print(f"\n\nUploading {file_path} to Kaltura with custom title, description, {len(caption_files)} caption files, and a custom thumbnail...")
+    upload_video_to_kaltura(file_path, video_title, video_description, caption_files, thumbnail_file_path, channel_id)
 
-channel_id = 374334092
-
-print(f"\n\nUploading {file_path} to Kaltura with custom title, description, {len(caption_files)} caption files, and a custom thumbnail...")
-upload_video_to_kaltura(file_path, video_title, video_description, caption_files, thumbnail_file_path, channel_id)
-
-# End Chrono
-run_time = round((time.time() - start_time), 3)
-print(f'\n{os.path.basename(__file__)} finished in {round(run_time)}s at {datetime.now().strftime("%H:%M:%S")}.\n')
+    # End Chrono
+    run_time = round((time.time() - start_time), 3)
+    print(f'\n{os.path.basename(__file__)} finished in {round(run_time)}s at {datetime.now().strftime("%H:%M:%S")}.\n')

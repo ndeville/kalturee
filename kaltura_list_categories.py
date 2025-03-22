@@ -1,55 +1,76 @@
 """LIST CATEGORIES FROM KALTURA KMS"""
 
+
 from datetime import datetime
 import os
-ts_time = f"{datetime.now().strftime('%H:%M:%S')}"
-ts_file = f"{datetime.now().strftime('%y%m%d-%H%M')}"
-print(f"\n---------- {ts_time} starting {os.path.basename(__file__)}")
-
-# Start Chrono
 import time
+from dotenv import load_dotenv
+from KalturaClient import *
+from KalturaClient.Plugins.Core import *
+
+# Start timing
 start_time = time.time()
+ts_time = f"{datetime.now().strftime('%H:%M:%S')}"
 
 # Credentials
-from dotenv import load_dotenv
 load_dotenv()
 MY_USER_SECRET = os.getenv("user_secret")
 MY_ADMIN_SECRET = os.getenv("admin_secret")
 MY_PARTNER_ID = os.getenv("partner_id")
 
-# Kaltura Client
-from KalturaClient import *
-from KalturaClient.Plugins.Core import *
+def list_kaltura_categories(USER_SECRET, ADMIN_SECRET, PARTNER_ID):
+    """
+    Lists categories from Kaltura KMS, focusing on those within the KMS Channel.
+    
+    Args:
+        print_output (bool): Whether to print results to console. Default True.
+        
+    Returns:
+        list: List of category objects that match the channel criteria
+    """
 
-config = KalturaConfiguration()
-config.serviceUrl = "https://www.kaltura.com/"
-client = KalturaClient(config)
+    # Kaltura Client
+    config = KalturaConfiguration()
+    config.serviceUrl = "https://www.kaltura.com/"
+    client = KalturaClient(config)
 
-adminSecret = MY_ADMIN_SECRET
-userId = ''  
-type = KalturaSessionType.ADMIN  
-partnerId = MY_PARTNER_ID  
-expiry = 86400  
-privileges = 'disableentitlement'  # Disables entitlement to allow listing all categories
-# Note: 'kms.user=nicolas.deville@kaltura.com' is used for user-specific operations
-# For listing categories, we need to disable entitlement restrictions
+    adminSecret = MY_ADMIN_SECRET
+    userId = ''  
+    type = KalturaSessionType.ADMIN  
+    partnerId = MY_PARTNER_ID  
+    expiry = 86400  
+    privileges = 'disableentitlement'  # Disables entitlement to allow listing all categories
 
-ks = client.session.start(adminSecret, userId, type, partnerId, expiry, privileges)
-client.setKs(ks)
+    ks = client.session.start(adminSecret, userId, type, partnerId, expiry, privileges)
+    client.setKs(ks)
 
-filter = KalturaCategoryFilter()
-pager = KalturaFilterPager()
+    filter = KalturaCategoryFilter()
+    pager = KalturaFilterPager()
 
-result = client.category.list(filter, pager)
+    result = client.category.list(filter, pager)
 
-print(f"\n\nPRINTING ONLY CATEGORIES WITHIN KMS CHANNEL:\n")
+    # Filter for categories within KMS Channel
+    channel_categories = []
+    for category in result.objects:
+        if category.fullName.startswith("MediaSpace>site>channels"):
+            channel_categories.append(category)
+            print(f"{category.id:<15}{category.name:<40}{category.fullName}")
 
-for category in result.objects:
-    if category.fullName.startswith("MediaSpace>site>channels"):
-        print(f"{category.id:<15}{category.name:<40}{category.fullName}")
 
-# End Chrono
-run_time = round((time.time() - start_time), 3)
-print(f'\n{os.path.basename(__file__)} finished in {round(run_time*1000)}ms at {datetime.now().strftime("%H:%M:%S")}.\n')
-# print(f'\n{os.path.basename(__file__)} finished in {round(run_time)}s at {datetime.now().strftime("%H:%M:%S")}.\n')
 
+    return channel_categories
+
+# Example usage when script is run directly
+if __name__ == "__main__":
+
+    print(f"\n\nPRINTING ONLY CATEGORIES WITHIN KMS CHANNEL:\n")
+    categories = list_kaltura_categories(MY_USER_SECRET, MY_ADMIN_SECRET, MY_PARTNER_ID)
+    print(f"\n{len(categories)} categories found in KMS\n")
+
+    print(type(categories))
+    print(categories)
+    # "category.id:<15}{category.name:<40}{category.fullName"
+
+    # End timing
+    run_time = round((time.time() - start_time), 3)
+    print(f'\nOperation finished in {round(run_time*1000)}ms at {datetime.now().strftime("%H:%M:%S")}.\n')
