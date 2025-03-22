@@ -59,7 +59,7 @@ def upload_video_to_kaltura(file_path):
     # Reference ID
     media_entry.referenceId = "auto-" + datetime.now().strftime('%Y%m%d%H%M%S')  # Add a reference ID 
     
-    # CATEGORY (add to a Category so it appears in KMS Channel)
+    # ❌ CATEGORY (add to a Category so it appears in KMS Channel)
     # Use the Category ID to be found in https://kmc.kaltura.com/index.php/kmcng/content/categories/list
     # media_entry.categories = "test_250322-0047" # NOT WORKING
     # media_entry.categoriesIds = "374334092"  # NOT WORKING. ID for test_250322-0047 channel. KalturaClient.exceptions.KalturaException: Category id "374334092" not found (CATEGORY_NOT_FOUND)
@@ -73,8 +73,13 @@ def upload_video_to_kaltura(file_path):
     # NONE OF THE ABOVE WORK. TRYING WITH OTHER APPROACH BELOW AFTER ADDING MEDIA ENTRY.
     # TODO: Figure out how to add to Category for it to appear in KMS Channel / See below for other approach.
 
-    media_entry.flavorParamsIds = "25350252"  # ✅
-    media_entry.name = f"test_video_{ts_file}" # ✅
+    # FLAVOURS ✅
+    media_entry.flavorParamsIds = "25350252"
+
+    # NAME ✅
+    media_entry.name = f"test_video_{ts_file}"
+
+    # DESCRIPTION ✅
     media_entry.description = f"I'm adding this description to the video." # ✅
     
     # Thumbnail / Use ID 1_oq7trpiz for tests
@@ -91,7 +96,7 @@ def upload_video_to_kaltura(file_path):
     
 
 
-    # THUMBNAIL
+    # THUMBNAIL ✅
     try:
         # Create a KalturaUrlResource for the thumbnail
         thumb_resource = KalturaUrlResource()
@@ -106,16 +111,17 @@ def upload_video_to_kaltura(file_path):
         # Set the content of the thumbnail
         client.thumbAsset.setContent(result_thumb.id, thumb_resource)
         
-        print(f"✅ Successfully added thumbnail to media entry")
-
-        # TODO: thumbnail gets uploaded but not set as default to media entry.
+        # Set this thumbnail as the default for the media entry
+        client.thumbAsset.setAsDefault(result_thumb.id)
+        
+        print(f"✅ Successfully added thumbnail to media entry and set as default")
 
     except Exception as e:
         print(f"❌ Error adding thumbnail: {e}")
 
 
 
-    # CATEGORY (add to a Category so it appears in KMS Channel)
+    # ❌ CATEGORY (add to a Category so it appears in KMS Channel)
     category_entry = KalturaCategoryEntry()
     category_entry.entryId = media_entry.id
     category_entry.categoryId = 374334092
