@@ -58,7 +58,7 @@ def upload_video_to_kaltura(file_path):
     # Reference ID
     media_entry.referenceId = "auto-" + datetime.now().strftime('%Y%m%d%H%M%S')  # Add a reference ID 
     
-    # Category (add to a Category so it appears in KMS Channel)
+    # CATEGORY (add to a Category so it appears in KMS Channel)
     # Use the Category ID to be found in https://kmc.kaltura.com/index.php/kmcng/content/categories/list
     # media_entry.categories = "test_250322-0047" # NOT WORKING
     # media_entry.categoriesIds = "374334092"  # NOT WORKING. ID for test_250322-0047 channel. KalturaClient.exceptions.KalturaException: Category id "374334092" not found (CATEGORY_NOT_FOUND)
@@ -70,11 +70,11 @@ def upload_video_to_kaltura(file_path):
     # media_entry.categories = 374334092 # NOT WORKING
     # media_entry.categories = "MediaSpace/site/channels/test_250322-0047" # NOT WORKING
     # NONE OF THE ABOVE WORK. TRYING WITH OTHER APPROACH BELOW AFTER ADDING MEDIA ENTRY.
-    # TODO: Figure out how to add to Category for it to appear in KMS Channel.
+    # TODO: Figure out how to add to Category for it to appear in KMS Channel / See below for other approach.
 
-    media_entry.flavorParamsIds = "25350252"  # Convert to string to avoid type issues
-    media_entry.name = f"test_video_{ts_file}"
-    media_entry.description = f"I'm adding this description to the video."
+    media_entry.flavorParamsIds = "25350252"  # ✅
+    media_entry.name = f"test_video_{ts_file}" # ✅
+    media_entry.description = f"I'm adding this description to the video." # ✅
     
     # Thumbnail / Use ID 1_oq7trpiz for tests
     # We'll add the thumbnail after the media entry is created
@@ -88,7 +88,8 @@ def upload_video_to_kaltura(file_path):
     resource.token = upload_token.id
     media_entry = client.media.addContent(media_entry.id, resource)
     
-    # Add thumbnail to the media entry
+
+    # THUMBNAIL
     try:
         # Create a KalturaUrlResource for the thumbnail
         thumb_resource = KalturaUrlResource()
@@ -110,7 +111,8 @@ def upload_video_to_kaltura(file_path):
     except Exception as e:
         print(f"❌ Error adding thumbnail: {e}")
     
-    # Category (add to a Category so it appears in KMS Channel)
+
+    # CATEGORY (add to a Category so it appears in KMS Channel)
     category_entry = KalturaCategoryEntry()
     category_entry.entryId = media_entry.id
     category_entry.categoryId = 374334092
