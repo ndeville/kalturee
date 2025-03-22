@@ -73,7 +73,11 @@ def upload_video_to_kaltura(file_path):
 
     media_entry.flavorParamsIds = "25350252"  # Convert to string to avoid type issues
     media_entry.name = f"test_video_{ts_file}"
+    media_entry.description = f"I'm adding this description to the video."
     
+    # Thumbnail / Use ID 1_oq7trpiz for tests
+    media_entry.thumbnailUrl = "1_oq7trpiz"
+
     # Add the media entry
     media_entry = client.media.add(media_entry)
     
