@@ -2,7 +2,7 @@
 
 This repository contains a collection of scripts for interacting with Kaltura's APIs, designed to streamline workflows for creating demos, uploading content, and managing media assets on the Kaltura platform.
 
-Uses https://github.com/yt-dlp/yt-dlp for downloading videos from YouTube
+> WORK IN PROGRESS
 
 ## Features
 
@@ -17,6 +17,12 @@ As of 2025-03-24, the following features are available:
   - Thumbnail generation from the first slide
   - Title extraction from filename
   - AI-generated descriptions based on slide content
+- **Download Website Resources**: Download favicons only for now. TODO: download stylesheet (to extract fonts & colors)
+- **Download Website Images**: Download HD images from a target website (for banners in demos)
+- **Loop Video**: Loop a video to a specific duration
+- **Download YouTube Channel Metadata**: Download metadata for a YouTube channel
+- **Download YouTube Videos**: Download videos from a YouTube channel
+- **Download YouTube Captions**: Download captions from a YouTube video
 
 ## Requirements
 
@@ -26,18 +32,5 @@ As of 2025-03-24, the following features are available:
 - LibreOffice (for PowerPoint slide conversion)
 - Ollama (for AI-generated descriptions)
 
-## Setup
-
-1. Clone this repository
-2. Install required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-3. Create a `.env` file with your Kaltura credentials:
-   ```
-   user_secret=your_user_secret
-   admin_secret=your_admin_secret
-   partner_id=your_partner_id
-   ```
 
 
