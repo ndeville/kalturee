@@ -173,18 +173,9 @@ if __name__ == '__main__':
     # youtube_url = "https://www.youtube.com/@GlencoreVideos"
     youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe"
 
-
-
     process_youtube_url_to_download(youtube_url)
 
 
-
-
-
-    # print('\n\n-------------------------------')
-    # print(f"\ncount_row:\t{count_row:,}")
-    # print(f"count_total:\t{count_total:,}")
-    # print(f"count:\t\t{count:,}")
     run_time = round((time.time() - start_time), 3)
     if run_time < 1:
         print(f'\n{os.path.basename(__file__)} finished in {round(run_time*1000)}ms at {datetime.now().strftime("%H:%M:%S")}.\n')

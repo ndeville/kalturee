@@ -1,10 +1,14 @@
-"""AUTOMATED YOUTUBE VIDEO DOWNLOAD & UPLOAD TO KALTURA KMS"""
+"""
+AUTOMATED YOUTUBE VIDEO DOWNLOAD & UPLOAD TO KALTURA KMS
+1) download a Youtube URL (video/playlist/channel) to a folder (incl. videos & metadata JSON)
+2) download captions OR generate captions for each video, in different languages
+3) download official Youtube thumbnail for each video OR generate a .jpg for each video
+4) generate title, description, tags, etc. using AI
+4) upload videos to Kaltura with thumbnail, captions, title, description, tags.
 
-""""
 TODO:
 - extract title, description, thumbnail, and more from JSON
 - run LLM to generate description, where missing
-- run Whisper to get captions, in different languages
 - upload videos to Kaltura
 """
 
@@ -18,14 +22,16 @@ print(f"\n---------- {ts_time} starting {os.path.basename(__file__)}")
 import time
 start_time = time.time()
 
+import my_utils
+
 import ytdownload_videos
 import kaltura_video_upload
 
 
-download_youtube_videos = False # False to test post-processing steps from saved files
+download_youtube_videos = True # False to test post-processing steps from saved files
+youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe"
 
 if download_youtube_videos:
-    youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe"
     youtube_download_path_with_files = ytdownload_videos.process_youtube_url_to_download(youtube_url)
     print(f"\n\n{youtube_download_path_with_files=}")
 else:
@@ -42,7 +48,7 @@ print(f"\n\nProcessing files in {youtube_download_path_with_files}")
 target_languages = [
     "EN",
     "FR",
-    # "DE",
+    "DE",
     # "ES",
     # "IT",
     # "PT",
@@ -78,41 +84,22 @@ def generate_captions(download_folder):
         video_name = os.path.basename(mp4_file)
         print(f"\nProcessing captions for: {video_name}")
         
-        caption_files = []
+        # caption_files = []
         
         for lang in target_languages:
             print(f"  Generating {lang} captions...")
-            try:
-                # For the first language, we'll use it as source and target
-                if lang == target_languages[0]:
-                    srt_path = generate_srt(mp4_file, source_lang=lang, output_lang=lang)
-                    # Rename the output file to include language code
-                    base_path = mp4_file.rsplit(".", 1)[0]
-                    new_srt_path = f"{base_path}_{lang.lower()}.srt"
-                    if srt_path != new_srt_path:
-                        os.rename(srt_path, new_srt_path)
-                        srt_path = new_srt_path
-                else:
-                    # For other languages, use the first language as source
-                    source_lang = target_languages[0]
-                    base_path = mp4_file.rsplit(".", 1)[0]
-                    srt_path = f"{base_path}_{lang.lower()}.srt"
-                    generate_srt(mp4_file, source_lang=source_lang, output_lang=lang)
-                
-                caption_files.append(srt_path)
-                print(f"  ✅ {lang} captions saved to: {os.path.basename(srt_path)}")
-            except Exception as e:
-                print(f"  ❌ Error generating {lang} captions: {e}")
-        
-        results[mp4_file] = caption_files
-    
-    return results
-
+            srt_path = generate_srt(mp4_file, source_lang="EN", output_lang=lang)
 
 
 captions = generate_captions(youtube_download_path_with_files)
 
 
+# THUMBNAIL
+"""
+Download official Youtube thumbnail for each .mp4 file, using the JSON file.
+OR
+Generate a .jpg for each .mp4 file (logic TBC).
+"""
 
 # End Chrono
 run_time = round((time.time() - start_time), 3)

@@ -1,3 +1,9 @@
+# 240718_nli_testing.py
+#
+# This script is used to do tests for the NLI project.
+# Goal:to create chapters in a Kaltura video.
+# TODO confirm if it works.
+
 import os
 import requests
 import xml.etree.ElementTree as ET
