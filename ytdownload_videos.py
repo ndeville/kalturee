@@ -57,30 +57,46 @@ def download_youtube_video(url, output_path=None, format='mp4'):
         if not output_path:
             output_path = os.getcwd()
             
-        # Make sure output directory exists
         os.makedirs(output_path, exist_ok=True)
             
-        # Configure yt-dlp options
+        # Add YouTube Premium authentication
         ydl_opts = {
-            'format': f'bestvideo[ext={format}]+bestaudio[ext=m4a]/best[ext={format}]',
+            'format': 'best[ext=mp4]/best',
             'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),
-            'writethumbnail': True,  # Download thumbnail
-            'writeinfojson': True,   # Save metadata as JSON
+            'writethumbnail': True,
+            'writeinfojson': True,
             'quiet': not verbose,
-            'progress': verbose
+            'progress': verbose,
+            'nocheckcertificate': True,
+            'ignoreerrors': True,
+            'extract_flat': False,
+            'playlist': True,
+            'yes_playlist': True,
+            # Add YouTube authentication
+            'username': os.getenv('YOUTUBE_EMAIL'),      # Your YouTube/Google email
+            'password': os.getenv('YOUTUBE_PASSWORD'),   # Your YouTube/Google password
         }
         
         # Create a yt-dlp instance and download the video
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            print(f"Downloading video from: {url}")
-            info = ydl.extract_info(url, download=True)
-            video_title = info.get('title', 'Unknown title')
+            print(f"Downloading from: {url}")
+            # First extract info to check if it's a playlist
+            meta_info = ydl.extract_info(url, download=False)
             
-            if verbose:
-                print(f"Downloaded: {video_title}")
+            if '_type' in meta_info and meta_info['_type'] == 'playlist':
+                print(f"Playlist detected with {len(meta_info['entries'])} videos")
+                # Download each video in the playlist
+                for entry in meta_info['entries']:
+                    if entry:
+                        video_url = entry['webpage_url']
+                        print(f"\nProcessing video: {entry.get('title', 'Unknown')}")
+                        ydl.download([video_url])
+            else:
+                # Single video
+                ydl.download([url])
             
             # Convert webp thumbnail to jpg
-            webp_files = glob.glob(os.path.join(output_path, f"{video_title}*.webp"))
+            webp_files = glob.glob(os.path.join(output_path, f"*{ydl_opts['outtmpl'][-10:]}*"))
             
             # If no files found with the exact title match, try a more flexible approach
             if not webp_files:
@@ -88,8 +104,8 @@ def download_youtube_video(url, output_path=None, format='mp4'):
                 webp_files = glob.glob(os.path.join(output_path, "*.webp"))
                 
                 # Alternative: use the info dict to get the exact filename
-                if 'thumbnails' in info and info['thumbnails']:
-                    for thumb in info['thumbnails']:
+                if 'thumbnails' in meta_info and meta_info['thumbnails']:
+                    for thumb in meta_info['thumbnails']:
                         if 'filename' in thumb:
                             potential_file = os.path.join(output_path, thumb['filename'])
                             if os.path.exists(potential_file) and potential_file.endswith('.webp'):
@@ -139,29 +155,26 @@ def process_youtube_url_to_download(youtube_url=None):
     
     print(f"\nℹ️  Files will be saved to: {download_path}")
     
-    vpn_connection = my_utils.connect_vpn()
+    # vpn_connection = my_utils.connect_vpn() # <class 'subprocess.Popen'> but reverts to True/False it seems
+
+    # if vpn_connection:
+    # print(f"✅ Connected to VPN")
     
-    print(f"vpn_connection:\t{vpn_connection}")
-    print(type(vpn_connection))
+    # Use the timestamped folder
+    download_folder = download_path
     
-    if vpn_connection:
-        print(f"✅ Connected to VPN")
-        
-        # Use the timestamped folder
-        download_folder = download_path
-        
-        # Download the video
-        success = download_youtube_video(youtube_url, download_folder)
-        
-        if success:
-            print(f"\n✅ Download completed successfully! Files saved to {download_folder}")
-        else:
-            print("\n❌ Download failed.")
-        
+    # Download the video
+    success = download_youtube_video(youtube_url, download_folder)
+    
+    if success:
+        print(f"\n✅ Download completed successfully! Files saved to {download_folder}")
     else:
-        print(f"❌ Failed to connect to VPN")
+        print("\n❌ Download failed.")
+        
+    # else:
+    #     print(f"❌ Failed to connect to VPN")
     
-    my_utils.disconnect_vpn()
+    # my_utils.disconnect_vpn()
     
     return download_path
 
@@ -171,7 +184,8 @@ if __name__ == '__main__':
 
     # youtube_url = "https://www.youtube.com/watch?v=pYsv9hxGo_0"
     # youtube_url = "https://www.youtube.com/@GlencoreVideos"
-    youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe"
+    # youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe" # ABB ?
+    youtube_url = "https://www.youtube.com/watch?v=7zT17jK5qLU&list=PLSWR1ylG_6JYl612AZJ_hA0N0y5EgOp_y"
 
     process_youtube_url_to_download(youtube_url)
 

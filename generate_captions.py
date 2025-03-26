@@ -59,7 +59,7 @@ def generate_srt(mp4_path, source_lang="EN", output_lang="EN", model_name="large
     # Modify the output path to include language code if not English
     base_path = mp4_path.rsplit(".", 1)[0]
     if output_lang.upper() != "EN":
-        srt_path = f"{base_path}_{output_lang.upper()}.srt"
+        srt_path = f"{base_path}_{output_lang.lower()}.srt"
     else:
         srt_path = f"{base_path}.srt"
     with open(srt_path, "w", encoding="utf-8") as f:

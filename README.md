@@ -32,5 +32,8 @@ As of 2025-03-24, the following features are available:
 - LibreOffice (for PowerPoint slide conversion)
 - Ollama (for AI-generated descriptions)
 
+## Status
 
-
+250325-2224: 
+- Youtube downloads not working anymore, need to find workaround.
+- .srt captions have long lines, need to find a way to cap at 40 chars.
