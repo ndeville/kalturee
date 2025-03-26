@@ -34,8 +34,7 @@ As of 2025-03-24, the following features are available:
 
 ## Status
 
-250325-2224: 
+250326-0623: 
 - Youtube downloads not working anymore, need to find workaround.
 - .srt captions have long lines, need to find a way to cap at 40 chars.
-
 
