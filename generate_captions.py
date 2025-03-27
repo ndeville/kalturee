@@ -50,6 +50,8 @@ def generate_srt(mp4_path, source_lang="EN", output_lang="EN", model_name="large
         text = seg["text"].strip()
         if output_lang != source_lang:
             text = translate_text(text, output_lang)
+        if text not in ["", " ", None]:
+            text = text.strip()
         srt_lines.append(str(i))
         srt_lines.append(f"{start} --> {end}")
         srt_lines.append(text)
