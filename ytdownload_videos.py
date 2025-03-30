@@ -25,15 +25,18 @@ def download_video_with_metadata(url, list_formats=False, format_id=None):
         'outtmpl': os.path.join(output_dir, f'%(title)s.%(ext)s'),
         'writeinfojson': True,
         'writesubtitles': True,
-        'subtitleslangs': ['en', 'de', 'fr', 'es', 'it', 'ja', 'ko', 'pt', 'ru', 'zh'],
-        'skip_download': list_formats,  # Skip download if just listing formats
+        # 'subtitleslangs': ['en', 'de', 'fr', 'es', 'it', 'ja', 'ko', 'pt', 'ru', 'zh'],
+        'subtitleslangs': ['en', 'de', 'fr'],
+        # 'skip_download': list_formats,  # Skip download if just listing formats
         'quiet': False,
+        'skip-download': True,
+        'write-thumbnail': True,
         'no_warnings': False,
         'ignoreerrors': False,
         'noplaylist': True,  # Ignore playlist, just download the video
         'listformats': list_formats,  # List formats if requested
-        'username': os.getenv("YOUTUBE_EMAIL"), # Add YouTube Premium authentication
-        'password': os.getenv("YOUTUBE_PASSWORD"), # Add YouTube Premium authentication
+        # 'username': os.getenv("YOUTUBE_EMAIL"), # Add YouTube Premium authentication
+        # 'password': os.getenv("YOUTUBE_PASSWORD"), # Add YouTube Premium authentication
     }
     
     try:
@@ -125,13 +128,11 @@ if __name__ == "__main__":
     # # First list available formats
     # print("\n\nListing available formats:")
     # download_video_with_metadata("https://www.youtube.com/watch?v=QpHZHtBkoKw", list_formats=True)
+    download_video_with_metadata("https://www.youtube.com/watch?v=QpHZHtBkoKw")
     
-    # # Then download with explicit format specification
-    print("\nNow attempting to download playlist:")
-    # Try best video + best audio combination
-    successfully_downloaded = download_playlist("https://www.youtube.com/playlist?list=PL17765924A33BEADB")
-
-    print(f"\n\nTotal videos successfully downloaded: {len(successfully_downloaded)}")
+    # print("\nNow attempting to download playlist:")
+    # successfully_downloaded = download_playlist("https://www.youtube.com/playlist?list=PL17765924A33BEADB")
+    # print(f"\n\nTotal videos successfully downloaded: {len(successfully_downloaded)}")
 
     # If the above fails, you could try with specific format IDs from the list:
     # For example, to get 1080p video + audio:
