@@ -39,7 +39,7 @@ def generate_translated_srt(srt_path, target_lang):
     
     # Skip if translation already exists
     if os.path.exists(output_path):
-        print(f"⏩ Skipping translation - File already exists: {os.path.basename(output_path)}")
+        print(f"⏩ Skipping translation - File already exists: {output_path}")
         return output_path
     
     # Check if the .txt file exists

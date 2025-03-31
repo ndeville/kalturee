@@ -95,7 +95,7 @@ def generate_en_srt(mp4_path):
         "--compute_type", COMPUTE_TYPE,
         "--max_line_width", MAX_LINE_WIDTH,
         "--max_line_count", MAX_LINE_COUNT,
-        "--language", LANGUAGE,
+        # "--language", LANGUAGE,
         "--task", TASK,
         # "--interpolate_method", INTERPOLATE_METHOD, # 250329-1534 removing to try to fix the overlapping segments issue
         # "--no_align", NO_ALIGN,
@@ -145,6 +145,7 @@ def generate_en_srt(mp4_path):
     srt_path = os.path.join(output_dir, f"{base_name}.srt")
     json_path = os.path.join(output_dir, f"{base_name}.json")
 
+    print(f"\nGenerated JSON file: {json_path}\n")
 
     # Post-processing to create a new .srt file with a more reasonable number of words per segment using the json output from whisperx
     with open(json_path, "r") as f:
@@ -161,6 +162,18 @@ def generate_en_srt(mp4_path):
                 current_chunk.append(word_info)
                 if len(current_chunk) >= max_words_per_segment:
                     # finalize chunk
+
+                    print("\nDebug: current_chunk =", current_chunk, end="\r")
+                    print("\nDebug: current_chunk[0] =", current_chunk[0], flush=True)
+
+                    # 250331-0754 troubleshooting line starting with "97%" and no "start" key
+                    if "start" not in current_chunk[0]:
+                        # Skip chunks without timestamp data or use the next word's timestamp
+                        if len(current_chunk) > 1 and "start" in current_chunk[1]:
+                            start_ts = current_chunk[1]["start"]
+                        else:
+                            continue  # Skip this chunk if no valid timestamp found
+
                     start_ts = current_chunk[0]["start"]
                     end_ts = current_chunk[-1]["end"]
                     text = " ".join([w["word"] for w in current_chunk])
@@ -249,7 +262,13 @@ if __name__ == "__main__":
     import os
 
     # test_file = "/Users/nic/dl/yt/pharma-demo/Mayo Clinic Q&A podcast： A vaccine milestone.mp4"
-    test_file = "/Users/nic/dl/yt/test/test.mp4"
+    # test_file = "/Users/nic/dl/yt/test/test.mp4"
+    # test_file = "/Users/nic/vid/250328-154450.mp4"
+    # test_file = "/Users/nic/vid/250312-163723.mp4"
+    # test_file = "/Users/nic/vid/250327-102136.mp4"
+    # test_file = "/Users/nic/vid/250312-163225.mp4"
+    # test_file = "/Users/nic/vid/250325-150148.mp4"
+    test_file = "/Users/nic/Dropbox/Kaltura/clients/linde/demo/linde_ceo_fireside.mp4"
 
     print(f"\n🔊 Generating 🇬🇧 English SRT for: {test_file}\n")
 

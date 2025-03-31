@@ -18,12 +18,10 @@ print(f"\n---------- {ts_time} starting {os.path.basename(__file__)}")
 import time
 start_time = time.time()
 
-# Credentials
+# Credentials management in .env file
 from dotenv import load_dotenv
 load_dotenv()
-MY_USER_SECRET = os.getenv("user_secret")
-MY_ADMIN_SECRET = os.getenv("admin_secret")
-MY_PARTNER_ID = os.getenv("partner_id")
+
 
 # Kaltura Client
 from KalturaClient import *
@@ -32,22 +30,14 @@ from KalturaClient.Plugins.Core import *
 from KalturaClient.Plugins.Caption import *
 from KalturaClient.Plugins.Caption import KalturaLanguage, KalturaCaptionAsset, KalturaCaptionType
 
-# Upload to Kaltura
-def upload_video_to_kaltura(file_path, title=None, description=None, caption_files=None, thumbnail_file_path=None, channel_id=None):
-    """
-    Upload a video to Kaltura with optional caption files and thumbnail
-    
-    Args:
-        file_path (str): Path to the video file to upload
-        title (str, optional): Title for the media entry. Defaults to "test_video_[timestamp]"
-        description (str, optional): Description for the media entry
-        caption_files (dict, optional): Dictionary of caption files with language as key 
-                                       and file path as value. Example:
-                                       {"English": "/path/to/en.vtt", "German": "/path/to/de.vtt"}
-        thumbnail_file_path (str, optional): Path to the thumbnail image file
-        channel_id (int, optional): Kaltura category ID (channel). Defaults to 374334092
-    """
-    global MY_USER_SECRET, MY_ADMIN_SECRET, MY_PARTNER_ID
+
+# FUNCTIONS
+
+
+
+
+
+def upload_video_to_kaltura(file_path, title=None, description=None, caption_files=None, thumbnail_file_path=None, channel_id=None, USER_SECRET=None, ADMIN_SECRET=None, PARTNER_ID=None): 
 
     # Kaltura service configuration
     config = KalturaConfiguration()
@@ -62,7 +52,7 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
     privileges = "disableentitlement"
 
     # Start session
-    ks = client.session.start(MY_ADMIN_SECRET, MY_USER_SECRET, KalturaSessionType.ADMIN, MY_PARTNER_ID, expiry, privileges)
+    ks = client.session.start(ADMIN_SECRET, USER_SECRET, KalturaSessionType.ADMIN, PARTNER_ID, expiry, privileges)
     client.setKs(ks)
     
     # Create upload token
@@ -158,7 +148,7 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
                 # Create a caption asset
                 caption_asset = KalturaCaptionAsset()
                 caption_asset.language = language  # Use the exact string value from the enum list
-                caption_asset.format = KalturaCaptionType.WEBVTT
+                caption_asset.format = KalturaCaptionType.SRT
                 caption_asset.label = language
                 
                 # Set first caption as default
@@ -208,19 +198,38 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
 
 if __name__ == "__main__":
 
-    file_path = "/Users/nic/Downloads/temp/test_video.mp4"
+
+    KMS = "Pharma" # "Pharma" or "MY_KMS"
+
+    # Credentials
+    if KMS == "MY_KMS":
+        USER_SECRET = os.getenv("user_secret")
+        ADMIN_SECRET = os.getenv("admin_secret")
+        PARTNER_ID = os.getenv("partner_id")
+    elif KMS == "Pharma":
+        USER_SECRET = os.getenv("pharma_user_secret")
+        ADMIN_SECRET = os.getenv("pharma_admin_secret")
+        PARTNER_ID = os.getenv("pharma_partner_id")
+
+
+
+    # file_path = "/Users/nic/Downloads/temp/test_video.mp4"
+    file_path = "/Users/nic/dl/yt/pharma-demo/cancer-symposium_A Time for Questions with Dr. Q.mp4"
     thumbnail_file_path = "/Users/nic/Downloads/temp/thumbnail2.jpg"
     caption_files = {
-        "English": "/Users/nic/Downloads/temp/en.vtt",
-        "German": "/Users/nic/Downloads/temp/de.vtt"
+        # "English": "/Users/nic/Downloads/temp/en.vtt",
+        # "German": "/Users/nic/Downloads/temp/de.vtt",
+        "English": "/Users/nic/dl/yt/pharma-demo/cancer-symposium_A Time for Questions with Dr. Q.srt",
+        "French": "/Users/nic/dl/yt/pharma-demo/cancer-symposium_A Time for Questions with Dr. Q_fr.srt",
     }
     video_title = f"Test Video {ts_file}"
     video_description = "This is a demonstration video uploaded with the Kaltura API, featuring multilingual captions and a custom thumbnail."
 
-    channel_id = 374334092
+    channel_id = 374884222
 
     print(f"\n\nUploading {file_path} to Kaltura with custom title, description, {len(caption_files)} caption files, and a custom thumbnail...")
-    upload_video_to_kaltura(file_path, video_title, video_description, caption_files, thumbnail_file_path, channel_id)
+    
+    upload_video_to_kaltura(file_path, title=video_title, description=video_description, caption_files=caption_files, thumbnail_file_path=thumbnail_file_path, channel_id=channel_id, USER_SECRET=USER_SECRET, ADMIN_SECRET=ADMIN_SECRET, PARTNER_ID=PARTNER_ID)
 
     # End Chrono
     run_time = round((time.time() - start_time), 3)
