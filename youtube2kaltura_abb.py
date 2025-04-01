@@ -7,219 +7,14 @@ AUTOMATED YOUTUBE VIDEO DOWNLOAD & UPLOAD TO KALTURA KMS
 4) upload videos to Kaltura with thumbnail, captions, title, description, tags.
 
 TODO:
+- use the CLI captions approach (1/3 time needed)
 - extract title, description, thumbnail, and more from JSON
-- TRANSLATIONS: run additional languages after the basic tasks (EN captiosn for all) by feeding entire transcript first then line by line + check what languages captions are missing
+- TRANSLATIONS: run additional languages after the basic tasks (EN captiosn for all) + check what languages captions are missing
+- upload videos to Kaltura
 """
 
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
-""" CONFIGURATION """
-
-test = False
-verbose = False
-
-project_name = "pharma-demo"
-
-max_videos_to_upload = 1000
-start_with = "longest_first" # "shortest_first" or "longest_first"
-new_thumbnail = True # Generate new thumbnail randomly if True, otherwise extract from _json if available (else generate a new one anyway)
-
-# PPTX
-pptx_path = "/Users/nic/demo/pharma/pharma-demo.pptx"
-theme_for_pptx_generation = "Pharmarceutical MSL & HCP Training presentations"
-num_presentations = 20
-
-target_languages = [
-    "EN",
-    "FR",
-    "DE",
-    # "ES",
-    # "CN",
-    # "IT",
-    # "PT",
-    # "AR",
-]
-
-# KMS
-KMS = "Pharma" # "Pharma" or "MY_KMS"
-
-CHANNELS = {
-    "Home": [],
-
-    "Therapeutic Areas": [
-        {
-            "label": "Oncology",
-            "description": "Comprehensive content covering the latest advancements, treatment strategies, emerging therapies, and clinical insights in the field of oncology, designed to support healthcare professionals treating cancer patients.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Cardiology",
-            "description": "Educational resources on cardiovascular health, including innovations in diagnosis, prevention strategies, clinical interventions, and updates from cardiology research and practice.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Neurology",
-            "description": "Expert-led sessions and research updates on neurological disorders, including content on diagnosis, disease management, and breakthrough treatments for conditions affecting the brain and nervous system.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Endocrinology",
-            "description": "Content centered on hormonal and metabolic disorders, with a focus on diabetes, thyroid diseases, and other endocrine conditions, alongside clinical guidelines and treatment innovations.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        }
-    ],
-
-    "Expert Exchange": [
-        {
-            "label": "KOL Interviews & Fireside Chats",
-            "description": "Engaging interviews and informal discussions with Key Opinion Leaders across medical specialties, offering expert perspectives on current trends, challenges, and innovations in healthcare.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "HCP Roundtables & Panel Discussions",
-            "description": "Dynamic group conversations among healthcare professionals on relevant clinical topics, offering diverse viewpoints, case sharing, and peer-to-peer learning opportunities.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Case Discussions",
-            "description": "Interactive sessions featuring detailed case studies that explore real-world scenarios, diagnostic challenges, and treatment pathways to support applied clinical decision-making.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Ask-the-Expert Sessions",
-            "description": "Live and on-demand Q&A sessions where clinicians can hear directly from leading experts as they address common questions and provide clarity on complex medical issues.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        }
-    ],
-
-    "Clinical Resources": [
-        {
-            "label": "Guidelines & Best Practices",
-            "description": "Up-to-date clinical guidelines, protocols, and best practice recommendations across therapeutic areas to aid in evidence-based patient care and standardized treatment delivery.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Continuing Medical Education (CME)",
-            "description": "Certified educational content designed for healthcare professionals seeking to earn CME credits while staying current on clinical practices and medical innovations.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        }
-    ],
-
-    "Patient Perspectives": [
-        {
-            "label": "Patient Journey Videos",
-            "description": "Compelling visual narratives highlighting individual patient experiences from diagnosis to treatment, illustrating the human side of healthcare and therapeutic impact.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Living with Disease – First-Person Stories",
-            "description": "Personal accounts from patients living with chronic or serious illnesses, shedding light on daily challenges, emotional resilience, and the support systems around them.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Caregiver Voices",
-            "description": "Stories and reflections from caregivers who provide emotional, physical, and logistical support to patients, offering insights into their vital role in the care continuum.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        }
-    ],
-
-    "Innovation & Research": [
-        {
-            "label": "Clinical Trial Insights",
-            "description": "Highlights from ongoing and completed clinical trials, including study design, key findings, and implications for clinical practice and future research directions.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Real World Evidence Highlights",
-            "description": "Summaries of observational data and outcomes derived from real-world clinical settings, offering valuable insights beyond randomized trials for everyday patient care.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Medical Affairs-Led Innovation",
-            "description": "Exploration of innovative initiatives and strategic programs led by medical affairs teams, demonstrating their role in advancing science and improving healthcare delivery.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        }
-    ],
-
-    "Live & Upcoming": [
-        {
-            "label": "Upcoming Webinars & Events",
-            "description": "Stay informed about scheduled live webinars, workshops, and virtual events featuring experts and interactive learning experiences across medical disciplines.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Key Congress On-Demand",
-            "description": "On-demand access to presentations, abstracts, and expert commentary from major international medical congresses, providing key takeaways and post-event insights.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Medical Events & Summits",
-            "description": "Coverage of high-impact medical events, including regional and global summits, with curated sessions that spotlight current research and clinical priorities.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Replay Library",
-            "description": "A curated library of past webinars, interviews, and discussions available for on-demand viewing, offering flexible learning opportunities anytime, anywhere.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        }
-    ]
-}
-
-# Credentials
-# Set up Kaltura credentials based on the selected KMS
-if KMS == "MY_KMS":
-    USER_SECRET = os.getenv("user_secret")
-    ADMIN_SECRET = os.getenv("admin_secret")
-    PARTNER_ID = os.getenv("partner_id")
-elif KMS == "Pharma":
-    USER_SECRET = os.getenv("pharma_user_secret")
-    ADMIN_SECRET = os.getenv("pharma_admin_secret")
-    PARTNER_ID = os.getenv("pharma_partner_id")
-elif KMS == "ABB":
-    USER_SECRET = os.getenv("abb_user_secret")
-    ADMIN_SECRET = os.getenv("abb_admin_secret")
-    PARTNER_ID = os.getenv("abb_partner_id")
-else:
-    print(f"❌ Error: Unknown KMS '{KMS}'. Please check your configuration.")
-    exit()
-
-OWNER = "nicolas.deville@kaltura.com"
-
-""" END CONFIGURATION """
-
-
-# Print configuration settings
-print("\n\n===== CONFIGURATION =====")
-print(f"Project name:\t\t{project_name}")
-print(f"Test mode:\t\t{'Enabled' if test else 'Disabled'}")
-print(f"Verbose mode:\t\t{'Enabled' if verbose else 'Disabled'}")
-print(f"Max videos to upload:\t{max_videos_to_upload}")
-print(f"Upload order:\t\t{start_with}")
-print(f"Generate new thumbnails\t{'Yes' if new_thumbnail else 'No, use existing when available'}")
-print(f"Target languages:\t{', '.join(target_languages)}")
-print(f"KMS:\t\t\t{KMS}")
-print(f"PPTX path:\t\t{pptx_path}")
-print(f"PPTX theme:\t\t{theme_for_pptx_generation}")
-print(f"# of presentations:\t{num_presentations}")
-
-# Print channel structure
-print("\nChannel structure:")
-for category, channels in CHANNELS.items():
-    print(f"  {category:30}{len(channels)} channels")
-
-print("\nCredentials:")
-print(f"Partner ID: {PARTNER_ID}")
-print(f"Owner: {OWNER}")
-print("User and Admin secrets: Configured")
-print("===========================\n")
-
-
-# IMPORTS
-
-
 from datetime import datetime
+import os
 ts_time = f"{datetime.now().strftime('%H:%M:%S')}"
 ts_file = f"{datetime.now().strftime('%y%m%d-%H%M')}"
 print(f"\n---------- {ts_time} starting {os.path.basename(__file__)}")
@@ -239,32 +34,153 @@ warnings.filterwarnings("ignore", message="Lightning automatically upgraded")
 
 # import utils
 
+import os
 import glob
 import csv
 from pathlib import Path
 
 import ytdownload_videos
 import kaltura_video_upload
+from pathlib import Path
+import os
+import glob
 from generate_captions import generate_en_srt
 from generate_metadata import generate_title, generate_description, generate_tags
 from generate_thumbnail import extract_best_thumbnail
 from generate_translation import generate_translated_srt
 from manage_kaltura_channels import get_kaltura_channels, get_channels_parent_id, create_kaltura_channel, generate_channel_description
 from kaltura_video_upload import upload_video_to_kaltura
-from manage_kaltura_videos import get_all_videos
-from generate_powerpoints import generate_pptx
-from kaltura_ppt_upload import upload_ppt_to_kaltura
+
+
+""" CONFIGURATION """
+
+test = False
+verbose = False
+project_name = "abb"
+start_with = "longest_first" # "shortest_first" or "longest_first"
+new_thumbnail = True # Generate new thumbnail randomly if True, otherwise extract from _json if available (else generate a new one anyway)
+target_languages = [
+    "EN",
+    "FR",
+    "DE",
+    # "ES",
+    # "CN",
+    # "IT",
+    # "PT",
+    # "AR",
+]
+
+KMS = "ABB" # "Pharma" or "MY_KMS" or "ABB"
+
+CHANNELS = {
+    "Home": [],
+
+    "Key Business Areas": [
+        {
+            "label": "Electrification",
+            "description": "Insights and updates across power distribution, electric mobility, and sustainable energy infrastructure — driving ABB’s mission toward a carbon-neutral future.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Automation & Robotics",
+            "description": "Showcasing ABB’s latest in industrial automation, robotics, and process optimisation with expert-led demos, factory success stories, and partner collaborations.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Smart Buildings & Infrastructure",
+            "description": "Innovations in smart building technologies, energy-efficient infrastructure, and intelligent control systems, enabling sustainable urban development.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        }
+    ],
+
+    "Knowledge Exchange": [
+        {
+            "label": "Expert Interviews & Tech Talks",
+            "description": "Deep dives with ABB technologists, partners and industry leaders on trends, technologies, and thought leadership in electrification and automation.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Global Roundtables",
+            "description": "Cross-functional roundtable discussions bringing together voices from ABB’s diverse business units and global locations.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Field Stories",
+            "description": "On-the-ground stories from ABB engineers and project managers, illustrating innovation in action across projects worldwide.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        }
+    ],
+
+    "Employee Enablement": [
+        {
+            "label": "Training & Certification",
+            "description": "Technical and compliance training for ABB employees and partners, including e-learning modules and certification programmes.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Leadership Communications",
+            "description": "Townhalls, strategic updates, and leadership messages aimed at keeping ABB teams aligned, inspired, and informed.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        }
+    ],
+
+    "Innovation & AI": [
+        {
+            "label": "AI-Powered Insights",
+            "description": "Demonstrations of how ABB integrates AI and data analytics into its solutions to drive smarter operations and predictive maintenance.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Sustainable Technology",
+            "description": "Videos highlighting ABB’s role in driving sustainable progress through technology, energy efficiency, and renewable solutions.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        }
+    ],
+
+    "Events & Replays": [
+        {
+            "label": "Live Events & Webinars",
+            "description": "Join upcoming virtual events hosted by ABB or watch keynotes and product launches live.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "On-Demand Library",
+            "description": "Access past events, training sessions, and expert talks anytime, from any device.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        }
+    ]
+}
+
+# Credentials
+if KMS == "MY_KMS":
+    USER_SECRET = os.getenv("user_secret")
+    ADMIN_SECRET = os.getenv("admin_secret")
+    PARTNER_ID = os.getenv("partner_id")
+elif KMS == "Pharma":
+    USER_SECRET = os.getenv("pharma_user_secret")
+    ADMIN_SECRET = os.getenv("pharma_admin_secret")
+    PARTNER_ID = os.getenv("pharma_partner_id")
+elif KMS == "ABB":
+    USER_SECRET = os.getenv("abb_user_secret")
+    ADMIN_SECRET = os.getenv("abb_admin_secret")
+    PARTNER_ID = os.getenv("abb_partner_id")
+
+
+OWNER = "nicolas.deville@kaltura.com"
+
+""" END CONFIGURATION """
 
 
 # GLOBAL VARIABLES
 
 count = 0
 count_video_uploaded = 0
+max_videos_to_upload = 1
 
 # DOWNLOAD YOUTUBE VIDEOS
 
 download_youtube_videos = False # False to only do post-processing steps from saved files
-youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe"
+youtube_url = "https://www.youtube.com/@abb"
 
 
 if download_youtube_videos:
@@ -771,11 +687,11 @@ print()
 print(target_channel_names)
 
 # Check existing channels in Kaltura
-all_channels = get_kaltura_channels(PARTNER_ID=PARTNER_ID, ADMIN_SECRET=ADMIN_SECRET)
-print(f"\nℹ️  {len(all_channels)} existing Kaltura channels: {all_channels}\n")
+channels = get_kaltura_channels(PARTNER_ID=PARTNER_ID, ADMIN_SECRET=ADMIN_SECRET)
+print(f"\nℹ️  {len(channels)} existing Kaltura channels: {channels}\n")
 
 # Identify channels that are not in Kaltura
-channels_not_in_kaltura = [channel for channel in target_channel_names if channel not in all_channels]
+channels_not_in_kaltura = [channel for channel in target_channel_names if channel not in channels]
 print(f"\nℹ️  {len(channels_not_in_kaltura)} channels not in Kaltura: {channels_not_in_kaltura}\n")
 
 parent_id = get_channels_parent_id(PARTNER_ID=PARTNER_ID, ADMIN_SECRET=ADMIN_SECRET)
@@ -909,10 +825,9 @@ video_channel_assignments = assign_channels_to_videos(channels)
 # UPLOAD VIDEOS TO KALTURA
 
 
-videos_already_in_kaltura = videos = get_all_videos(PARTNER_ID, ADMIN_SECRET)
 
 def upload_videos_to_kaltura(folder_path):
-    global count_video_uploaded, max_videos_to_upload, videos_already_in_kaltura
+    global count_video_uploaded, max_videos_to_upload
 
     # Find all MP4 files in the folder
     all_mp4_files = glob.glob(os.path.join(folder_path, "*.mp4"))
@@ -933,28 +848,16 @@ def upload_videos_to_kaltura(folder_path):
         has_tags = os.path.exists(f"{base_name}_tags.txt")
         has_thumbnail = os.path.exists(f"{base_name}.jpg")
         
-        # Check if video title already exists in Kaltura
-        title_exists_in_kaltura = False
-        if has_title:
-            with open(f"{base_name}_title.txt", 'r', encoding='utf-8') as f:
-                video_title = f.read().strip()
-                if video_title in videos_already_in_kaltura:
-                    title_exists_in_kaltura = True
-                    print(f"ℹ️   Skipping {mp4_file} - already exists in Kaltura")
-        
-        if has_title and has_srt and has_description and has_tags and has_thumbnail and not title_exists_in_kaltura:
+        if has_title and has_srt and has_description and has_tags and has_thumbnail:
             mp4_files.append(mp4_file)
         else:
-            if title_exists_in_kaltura:
-                continue
             missing = []
             if not has_title: missing.append("title")
             if not has_srt: missing.append("captions")
             if not has_description: missing.append("description")
             if not has_tags: missing.append("tags")
             if not has_thumbnail: missing.append("thumbnail")
-            print(f"⚠️ Skipping {mp4_file} - missing: {', '.join(missing)}")
-
+            print(f"⚠️ Skipping {os.path.basename(mp4_file)} - missing: {', '.join(missing)}")
     
     if not mp4_files:
         print(f"No MP4 files with all required associated files found in {folder_path}")
@@ -974,7 +877,7 @@ def upload_videos_to_kaltura(folder_path):
         video_name = os.path.basename(mp4_file)
         base_name = mp4_file.rsplit(".", 1)[0]
         
-        print(f"\n\n\n📤 Processing upload  #{count_video_uploaded + 1} of {len(mp4_files)}: {mp4_file}")
+        print(f"\n📤 Processing {video_name} for upload")
         
         # Check for title
         title = None
@@ -1056,91 +959,40 @@ def upload_videos_to_kaltura(folder_path):
                 break
 
 
-        # Upload the video with all available metadata and retry logic
+        # Upload the video with all available metadata
+        # try:
+
         if count_video_uploaded < max_videos_to_upload:
-            max_retries = 3
-            retry_count = 0
-            
-            while retry_count < max_retries:
-                try:
-                    print(f"\n🔄 Uploading video {count_video_uploaded + 1} of {len(mp4_files)} to Kaltura (attempt {retry_count + 1}/{max_retries}):\nPath:\t{mp4_file}\nTitle:\t{title}\nTags:\t{tags}\nThumbnail:\t{thumbnail_file_path}\nChannel ID:\t{channel_id}\n")
-                    
-                    # Increase timeout values
-                    upload_video_to_kaltura(
-                        file_path=mp4_file,
-                        title=title,
-                        description=description,
-                        caption_files=caption_files,
-                        thumbnail_file_path=thumbnail_file_path,
-                        channel_id=channel_id,
-                        USER_SECRET=USER_SECRET,
-                        ADMIN_SECRET=ADMIN_SECRET,
-                        PARTNER_ID=PARTNER_ID,
-                        timeout=300  # Increase timeout to 5 minutes
-                    )
-                    # print(f"  ✅ Video uploaded successfully")
-                    count_video_uploaded += 1
-                    break  # Exit retry loop on success
-                    
-                except Exception as e:
-                    retry_count += 1
-                    if retry_count < max_retries:
-                        wait_time = retry_count * 30  # Exponential backoff: 30s, 60s, 90s
-                        print(f"  ⚠️ Upload failed (attempt {retry_count}/{max_retries}): {str(e)}")
-                        print(f"  🕐 Waiting {wait_time} seconds before retrying...")
-                        time.sleep(wait_time)
-                    else:
-                        print(f"  ❌ Failed to upload video after {max_retries} attempts: {str(e)}")
-                        # Optionally log failed uploads for later retry
-                        with open("failed_uploads.txt", "a") as f:
-                            f.write(f"{mp4_file}\n")
+
+            print(f"\n🔄 Uploading video to Kaltura:\nPath:\t{mp4_file}\nTitle:\t{title}\nTags:\t{tags}\nThumbnail:\t{thumbnail_file_path}\nChannel ID:\t{channel_id}\n")
+            upload_video_to_kaltura(
+                file_path=mp4_file,
+                title=title,
+                description=description,
+                caption_files=caption_files,
+                thumbnail_file_path=thumbnail_file_path,
+                channel_id=channel_id,
+                USER_SECRET=USER_SECRET,
+                ADMIN_SECRET=ADMIN_SECRET,
+                PARTNER_ID=PARTNER_ID
+            )
+            print(f"  ✅ Video uploaded successfully")
+            count_video_uploaded += 1
         else:
             print(f"  ⚠️ Skipping video {video_name} - max videos to upload reached")
-            break
+        # Stop script here as requested
+        print(f"\nℹ️   Script execution stopped after uploading {count_video_uploaded} videos\n")
+        import sys
+        sys.exit(0)
 
+        # except Exception as e:
+        #     print(f"  ❌ Error uploading video: {str(e)}")
+
+# Upload all videos with metadata to Kaltura
 upload_videos_to_kaltura(youtube_download_path_with_files)
 
 
 
-# POWERRPOINT
-
-# Generate PPTX files
-pptx_files = glob.glob(os.path.join(os.path.dirname(pptx_path), "*_[0-9][0-9].pptx"))
-if len(pptx_files) == 0:
-    generate_pptx(pptx_path, theme_for_pptx_generation, num_presentations)
-
-# List of PPTX files
-pptx_files = glob.glob(os.path.join(os.path.dirname(pptx_path), "*_[0-9][0-9].pptx"))
-
-print(f"\nℹ️  Found {len(pptx_files)} PPTX files in {os.path.join(os.path.dirname(pptx_path))}:")
-for pptx_file in pptx_files:
-    print(f"  - {pptx_file}")
-
-
-# Identify Channel to upload to (with "PPT" in the name)
-print(f"\nℹ️  {len(all_channels)} channels found in Kaltura:\n")
-for channel_name, channel_id in all_channels.items():
-    print(f"{channel_id}\t{channel_name}")
-
-try:
-    target_channel_names = [name for name in channels.keys() if "PPT" in name or "Powerpoint" in name]
-    channel_id_for_ppt_upload = channels[target_channel_names[0]]
-    print(f"\nℹ️  Uploading to channel ID: {channel_id_for_ppt_upload}")
-except Exception as e:
-    print(f"\n❌ Error: No channel found with 'PPT' in the name to upload {len(pptx_files)} PPTX files to.")
-    print(f"   {e}")
-    exit()
-
-
-# UPLOAD PPTX TO KALTURA
-for pptx_file in pptx_files:
-    upload_ppt_to_kaltura(pptx_file, channel_id=channel_id_for_ppt_upload, demo_mode=True, MY_USER_SECRET=USER_SECRET, MY_ADMIN_SECRET=ADMIN_SECRET, MY_PARTNER_ID=PARTNER_ID)
-
-
-
 # End Chrono
-run_time = time.time() - start_time
-minutes = int(run_time // 60)
-seconds = int(round(run_time % 60, 0))
-print(f"\n\n--------------------------------")
-print(f'{os.path.basename(__file__)} finished in {minutes}m{seconds}s at {datetime.now().strftime("%H:%M:%S")}.\n')
+run_time = round((time.time() - start_time), 3)
+print(f'\n{os.path.basename(__file__)} finished in {round(run_time)}s at {datetime.now().strftime("%H:%M:%S")}.\n')

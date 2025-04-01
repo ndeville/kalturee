@@ -145,7 +145,7 @@ def generate_en_srt(mp4_path):
     srt_path = os.path.join(output_dir, f"{base_name}.srt")
     json_path = os.path.join(output_dir, f"{base_name}.json")
 
-    print(f"\nGenerated JSON file: {json_path}\n")
+    print(f"\n✅ Generated JSON file: {json_path}")
 
     # Post-processing to create a new .srt file with a more reasonable number of words per segment using the json output from whisperx
     with open(json_path, "r") as f:
@@ -159,21 +159,12 @@ def generate_en_srt(mp4_path):
             words = seg["words"]
             current_chunk = []
             for word_info in words:
+                # Skip words without timestamp data
+                if "start" not in word_info or "end" not in word_info:
+                    continue
                 current_chunk.append(word_info)
                 if len(current_chunk) >= max_words_per_segment:
                     # finalize chunk
-
-                    print("\nDebug: current_chunk =", current_chunk, end="\r")
-                    print("\nDebug: current_chunk[0] =", current_chunk[0], flush=True)
-
-                    # 250331-0754 troubleshooting line starting with "97%" and no "start" key
-                    if "start" not in current_chunk[0]:
-                        # Skip chunks without timestamp data or use the next word's timestamp
-                        if len(current_chunk) > 1 and "start" in current_chunk[1]:
-                            start_ts = current_chunk[1]["start"]
-                        else:
-                            continue  # Skip this chunk if no valid timestamp found
-
                     start_ts = current_chunk[0]["start"]
                     end_ts = current_chunk[-1]["end"]
                     text = " ".join([w["word"] for w in current_chunk])
@@ -202,7 +193,7 @@ def generate_en_srt(mp4_path):
                 srt.write(f"{srt_time(start)} --> {srt_time(end)}\n")
                 srt.write(text.strip() + "\n\n")
         
-        print(f"\n✅ Generated SRT file: {srt_path}\n")
+        print(f"\n✅ Generated SRT file: {srt_path}")
 
 
     # Create a clean .txt version of the SRT file
@@ -222,7 +213,7 @@ def generate_en_srt(mp4_path):
             with open(txt_path, "w") as f:
                 f.write(content.rstrip("\n"))
         
-        print(f"✅ Generated clean TXT file: {txt_path}")
+        print(f"\n✅ Generated clean TXT file: {txt_path}")
     except Exception as e:
         print(f"❌ Error creating TXT file: {str(e)}")
 

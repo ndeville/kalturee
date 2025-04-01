@@ -37,11 +37,12 @@ from KalturaClient.Plugins.Caption import KalturaLanguage, KalturaCaptionAsset, 
 
 
 
-def upload_video_to_kaltura(file_path, title=None, description=None, caption_files=None, thumbnail_file_path=None, channel_id=None, USER_SECRET=None, ADMIN_SECRET=None, PARTNER_ID=None): 
+def upload_video_to_kaltura(file_path, title=None, description=None, caption_files=None, thumbnail_file_path=None, channel_id=None, USER_SECRET=None, ADMIN_SECRET=None, PARTNER_ID=None, timeout=120): 
 
     # Kaltura service configuration
-    config = KalturaConfiguration()
+    config = KalturaConfiguration(PARTNER_ID)
     config.serviceUrl = "https://www.kaltura.com/"
+    config.requestTimeout = timeout  # Increase timeout to 120 seconds
     client = KalturaClient(config)
     
     # Load the Caption plugin with correct capitalization
@@ -190,7 +191,7 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
     except Exception as e:
         print(f"❌ Error adding to category: {e}")
     
-    print(f"\n✅ Upload successful of '{media_entry.name}': https://nicolas.mediaspace.kaltura.com/media/{media_entry.id}")
+    print(f"\n✅ 🎉🎉🎉 Upload successful of {file_path} to https://nicolas.mediaspace.kaltura.com/media/{media_entry.id}")
 
     file_data.close()
 
@@ -232,5 +233,7 @@ if __name__ == "__main__":
     upload_video_to_kaltura(file_path, title=video_title, description=video_description, caption_files=caption_files, thumbnail_file_path=thumbnail_file_path, channel_id=channel_id, USER_SECRET=USER_SECRET, ADMIN_SECRET=ADMIN_SECRET, PARTNER_ID=PARTNER_ID)
 
     # End Chrono
-    run_time = round((time.time() - start_time), 3)
-    print(f'\n{os.path.basename(__file__)} finished in {round(run_time)}s at {datetime.now().strftime("%H:%M:%S")}.\n')
+    run_time = time.time() - start_time
+    minutes = int(run_time // 60)
+    seconds = round(run_time % 60, 3)
+    print(f'\n{os.path.basename(__file__)} finished in {minutes}m{seconds}s at {datetime.now().strftime("%H:%M:%S")}.\n')

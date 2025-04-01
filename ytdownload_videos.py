@@ -123,12 +123,12 @@ def download_playlist(playlist_url, format_id=None):
 
 if __name__ == "__main__":
 
-    output_dir=f"/Users/nic/dl/yt/{datetime.now().strftime('%y%m%d%H%M')}"
+    output_dir=f"/Users/nic/dl/yt/abb"
 
     # # First list available formats
     # print("\n\nListing available formats:")
     # download_video_with_metadata("https://www.youtube.com/watch?v=QpHZHtBkoKw", list_formats=True)
-    download_video_with_metadata("https://www.youtube.com/watch?v=QpHZHtBkoKw")
+    download_video_with_metadata("https://www.youtube.com/@abb")
     
     # print("\nNow attempting to download playlist:")
     # successfully_downloaded = download_playlist("https://www.youtube.com/playlist?list=PL17765924A33BEADB")

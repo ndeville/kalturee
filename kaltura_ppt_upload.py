@@ -1,12 +1,5 @@
 """UPLOAD SINGLE POWERPOINT FILE TO KALTURA"""
 
-"""
-TODO:
-- generate thumbnail from first slide
-- generate title from first slide
-- generate description from overall content
-"""
-
 from datetime import datetime
 import os
 import subprocess
@@ -33,7 +26,6 @@ from KalturaClient import *
 from KalturaClient.Plugins.Core import *
 # Import Document plugin
 from KalturaClient.Plugins.Document import *
-
 
 
 
@@ -125,7 +117,7 @@ Do not include any other text than the description.
 
 
 # TITLE (generate title from file name)
-def generate_title_from_ppt(file_path):
+def generate_title_from_ppt_filename(file_path):
     print(f"Generating title from {file_path}...")
     
     # Extract the filename from the path
@@ -139,17 +131,50 @@ def generate_title_from_ppt(file_path):
 
     print(f"\t> Title: {title}")
     
-    return title
+    return title.strip('"\'')
 
-
-
-
+# Extract title from first slide of PowerPoint
+def generate_title_from_ppt_first_slide(file_path):
+    print(f"Extracting title from first slide of {file_path}...")
+    
+    try:
+        # Import pptx library for PowerPoint manipulation
+        from pptx import Presentation
+        
+        # Load the presentation
+        presentation = Presentation(file_path)
+        
+        # Get the first slide
+        if len(presentation.slides) > 0:
+            first_slide = presentation.slides[0]
+            
+            # Extract text from all shapes in the first slide
+            title_text = ""
+            for shape in first_slide.shapes:
+                if hasattr(shape, "text") and shape.text:
+                    # Use the first non-empty text element as the title
+                    title_text = shape.text.strip()
+                    break
+            
+            if title_text:
+                print(f"\t> Title from first slide: {title_text}")
+                return title_text.strip('"\'')
+            else:
+                print(f"\t> No text found in first slide, falling back to filename")
+                return generate_title_from_ppt_filename(file_path)
+        else:
+            print(f"\t> No slides found in presentation, falling back to filename")
+            return generate_title_from_ppt_filename(file_path)
+            
+    except Exception as e:
+        print(f"\t❌ Error extracting title from first slide: {str(e)}")
+        print(f"\t> Falling back to filename-based title")
+        return generate_title_from_ppt_filename(file_path)
 
 
 
 # Upload to Kaltura
-def upload_ppt_to_kaltura(file_path, channel_id=None):
-    global MY_USER_SECRET, MY_ADMIN_SECRET, MY_PARTNER_ID
+def upload_ppt_to_kaltura(file_path, channel_id=None, demo_mode=False, MY_USER_SECRET=None, MY_ADMIN_SECRET=None, MY_PARTNER_ID=None): 
 
     # Kaltura service configuration
     config = KalturaConfiguration()
@@ -191,7 +216,10 @@ def upload_ppt_to_kaltura(file_path, channel_id=None):
     document_entry.referenceId = "auto-" + datetime.now().strftime('%Y%m%d%H%M%S')
     
     # ✅ TITLE
-    document_entry.name = generate_title_from_ppt(file_path)
+    if not demo_mode:
+        document_entry.name = generate_title_from_ppt_filename(file_path)
+    else:
+        document_entry.name = generate_title_from_ppt_first_slide(file_path)
 
     # ✅ DESCRIPTION
     # Generate description from overall content using AI
@@ -201,6 +229,7 @@ def upload_ppt_to_kaltura(file_path, channel_id=None):
     document_entry.userId = "nicolas.deville@kaltura.com"
     document_entry.creatorId = "nicolas.deville@kaltura.com"
     
+
 
     # ADD THE DOCUMENT ENTRY
     document_entry = client.baseEntry.add(document_entry)
@@ -254,6 +283,7 @@ def upload_ppt_to_kaltura(file_path, channel_id=None):
         print(f"✅ Successfully added entry to category ID: {channel_id}")
     except Exception as e:
         print(f"❌ Error adding to category: {e}")
+        exit()
     
     document_url = f"https://nicolas.mediaspace.kaltura.com/media/{document_entry.id}"
     # Print the URL of the uploaded document
@@ -267,11 +297,33 @@ def upload_ppt_to_kaltura(file_path, channel_id=None):
 
 if __name__ == "__main__":
 
-    file_path = "/Users/nic/Downloads/temp/test-ppt-upload.pptx"
-    channel_id = 324250232
+    KMS = "Pharma"
+
+    # Credentials
+    # Set up Kaltura credentials based on the selected KMS
+    if KMS == "MY_KMS":
+        USER_SECRET = os.getenv("user_secret")
+        ADMIN_SECRET = os.getenv("admin_secret")
+        PARTNER_ID = os.getenv("partner_id")
+    elif KMS == "Pharma":
+        USER_SECRET = os.getenv("pharma_user_secret")
+        ADMIN_SECRET = os.getenv("pharma_admin_secret")
+        PARTNER_ID = os.getenv("pharma_partner_id")
+    elif KMS == "ABB":
+        USER_SECRET = os.getenv("abb_user_secret")
+        ADMIN_SECRET = os.getenv("abb_admin_secret")
+        PARTNER_ID = os.getenv("abb_partner_id")
+    else:
+        print(f"❌ Error: Unknown KMS '{KMS}'. Please check your configuration.")
+        exit()
+
+
+    # file_path = "/Users/nic/Downloads/temp/test-ppt-upload.pptx"
+    file_path = "/Users/nic/demo/pharma/pharma-demo.pptx"
+    channel_id = 374884072
 
     print(f"\n\nUploading {file_path} to Kaltura with custom title, description, and a custom thumbnail...")
-    upload_ppt_to_kaltura(file_path, channel_id)
+    upload_ppt_to_kaltura(file_path, channel_id=channel_id, demo_mode=True, MY_USER_SECRET=USER_SECRET, MY_ADMIN_SECRET=ADMIN_SECRET, MY_PARTNER_ID=PARTNER_ID)
     print(f"\n\n✅ File uploaded successfully to Kaltura")
 
     # End Chrono
