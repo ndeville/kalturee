@@ -27,9 +27,10 @@ start_with = "longest_first" # "shortest_first" or "longest_first"
 new_thumbnail = True # Generate new thumbnail randomly if True, otherwise extract from _json if available (else generate a new one anyway)
 
 # PPTX
-pptx_path = "/Users/nic/demo/pharma/pharma-demo.pptx"
-theme_for_pptx_generation = "Pharmarceutical MSL & HCP Training presentations"
-num_presentations = 20
+pptx_path = "/Users/nic/demo/pharma/pharma-demo-deck.pptx" # filename needs to end with "-deck.pptx"
+background_image_path = "/Users/nic/demo/pharma/pharma-empty-background.jpg" # 1920x1080
+theme_for_pptx_generation = "write about a random medical topic"
+num_presentations = 5
 
 target_languages = [
     "EN",
@@ -243,18 +244,25 @@ import glob
 import csv
 from pathlib import Path
 
+import os
+import json
+import requests
+from generate_thumbnails import generate_video_thumbnail
+
+
 import ytdownload_videos
 import kaltura_video_upload
 from generate_captions import generate_en_srt
 from generate_metadata import generate_title, generate_description, generate_tags
-from generate_thumbnail import extract_best_thumbnail
+from generate_thumbnails import generate_video_thumbnail
 from generate_translation import generate_translated_srt
 from manage_kaltura_channels import get_kaltura_channels, get_channels_parent_id, create_kaltura_channel, generate_channel_description
 from kaltura_video_upload import upload_video_to_kaltura
 from manage_kaltura_videos import get_all_videos
-from generate_powerpoints import generate_pptx
+# from generate_powerpoint_data import generate_pptx
 from kaltura_ppt_upload import upload_ppt_to_kaltura
 
+from generate_thumbnails import generate_video_thumbnail
 
 # GLOBAL VARIABLES
 
@@ -638,9 +646,6 @@ Generate a .jpg for each .mp4 file (logic TBC).
 
 if new_thumbnail:
     def generate_thumbnails(folder_path):
-
-        import os
-        from generate_thumbnail import extract_best_thumbnail
         
         mp4_files = glob.glob(os.path.join(folder_path, "*.mp4"))
         
@@ -665,7 +670,7 @@ if new_thumbnail:
             
             print(f"  🔄 Generating thumbnail for: {video_name}")
             try:
-                extract_best_thumbnail(mp4_file)
+                generate_video_thumbnail(mp4_file)
                 print(f"  ✅ Thumbnail generated successfully")
                 results[mp4_file] = thumbnail_file_path
             except Exception as e:
@@ -678,11 +683,6 @@ if new_thumbnail:
 
 else:
     def extract_thumbnails_from_json(folder_path):
-
-        import os
-        import json
-        import requests
-        from generate_thumbnail import extract_best_thumbnail
         
         mp4_files = glob.glob(os.path.join(folder_path, "*.mp4"))
         
@@ -738,7 +738,7 @@ else:
             if not thumbnail_extracted:
                 print(f"  🔄 Falling back to generating thumbnail for: {video_name}")
                 try:
-                    extract_best_thumbnail(mp4_file)
+                    generate_video_thumbnail(mp4_file)
                     print(f"  ✅ Thumbnail generated successfully")
                     results[mp4_file] = thumbnail_file_path
                 except Exception as e:
@@ -1104,37 +1104,33 @@ upload_videos_to_kaltura(youtube_download_path_with_files)
 
 # POWERRPOINT
 
-# Generate PPTX files
-pptx_files = glob.glob(os.path.join(os.path.dirname(pptx_path), "*_[0-9][0-9].pptx"))
-if len(pptx_files) == 0:
-    generate_pptx(pptx_path, theme_for_pptx_generation, num_presentations)
-
-# List of PPTX files
-pptx_files = glob.glob(os.path.join(os.path.dirname(pptx_path), "*_[0-9][0-9].pptx"))
-
-print(f"\nℹ️  Found {len(pptx_files)} PPTX files in {os.path.join(os.path.dirname(pptx_path))}:")
-for pptx_file in pptx_files:
-    print(f"  - {pptx_file}")
-
-
 # Identify Channel to upload to (with "PPT" in the name)
 print(f"\nℹ️  {len(all_channels)} channels found in Kaltura:\n")
 for channel_name, channel_id in all_channels.items():
     print(f"{channel_id}\t{channel_name}")
 
-try:
-    target_channel_names = [name for name in channels.keys() if "PPT" in name or "Powerpoint" in name]
-    channel_id_for_ppt_upload = channels[target_channel_names[0]]
-    print(f"\nℹ️  Uploading to channel ID: {channel_id_for_ppt_upload}")
-except Exception as e:
-    print(f"\n❌ Error: No channel found with 'PPT' in the name to upload {len(pptx_files)} PPTX files to.")
-    print(f"   {e}")
-    exit()
+    try:
+        target_channel_names = [name for name in channels.keys() if "PPT" in name or "Powerpoint" in name]
+        channel_id_for_ppt_upload = channels[target_channel_names[0]]
+        print(f"\nℹ️  Uploading to channel ID: {channel_id_for_ppt_upload}")
+    except Exception as e:
+        print(f"\n❌ Error: No channel found with 'PPT' in the name to upload {num_presentations} PPTX files to. Create one first.")
+        print(f"   {e}")
+        exit()
 
 
-# UPLOAD PPTX TO KALTURA
-for pptx_file in pptx_files:
-    upload_ppt_to_kaltura(pptx_file, channel_id=channel_id_for_ppt_upload, demo_mode=True, MY_USER_SECRET=USER_SECRET, MY_ADMIN_SECRET=ADMIN_SECRET, MY_PARTNER_ID=PARTNER_ID)
+from generate_thumbnails import generate_ppt_thumbnail
+
+for x in range(num_presentations):
+
+    target_output_path = f"{pptx_path.rsplit('.', 1)[0]}_{x+1:02d}.jpg"
+
+    ppt_thumbnail_path, title_text, subtitle_text = generate_ppt_thumbnail(background_image_path, theme_for_pptx_generation, output_path=target_output_path)
+
+    print(f"\n{ppt_thumbnail_path=}\n{title_text=}\n{subtitle_text=}\n")
+
+    # UPLOAD PPTX TO KALTURA
+    upload_ppt_to_kaltura(pptx_path, channel_id=channel_id_for_ppt_upload, demo_mode=True, ppt_thumbnail_path=ppt_thumbnail_path, title_text=title_text, subtitle_text=subtitle_text, MY_USER_SECRET=USER_SECRET, MY_ADMIN_SECRET=ADMIN_SECRET, MY_PARTNER_ID=PARTNER_ID)
 
 
 

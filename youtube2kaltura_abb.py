@@ -46,7 +46,7 @@ import os
 import glob
 from generate_captions import generate_en_srt
 from generate_metadata import generate_title, generate_description, generate_tags
-from generate_thumbnail import extract_best_thumbnail
+from generate_thumbnails import extract_best_thumbnail
 from generate_translation import generate_translated_srt
 from manage_kaltura_channels import get_kaltura_channels, get_channels_parent_id, create_kaltura_channel, generate_channel_description
 from kaltura_video_upload import upload_video_to_kaltura
@@ -556,7 +556,7 @@ if new_thumbnail:
     def generate_thumbnails(folder_path):
 
         import os
-        from generate_thumbnail import extract_best_thumbnail
+        from generate_thumbnails import extract_best_thumbnail
         
         mp4_files = glob.glob(os.path.join(folder_path, "*.mp4"))
         
@@ -598,7 +598,7 @@ else:
         import os
         import json
         import requests
-        from generate_thumbnail import extract_best_thumbnail
+        from generate_thumbnails import extract_best_thumbnail
         
         mp4_files = glob.glob(os.path.join(folder_path, "*.mp4"))
         
