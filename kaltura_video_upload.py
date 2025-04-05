@@ -191,9 +191,13 @@ def upload_video_to_kaltura(file_path, title=None, description=None, caption_fil
     except Exception as e:
         print(f"❌ Error adding to category: {e}")
     
-    print(f"\n✅ 🎉🎉🎉 Upload successful of {file_path} to https://nicolas.mediaspace.kaltura.com/media/{media_entry.id}")
+
+    video_url = f"https://nicolas.mediaspace.kaltura.com/media/{media_entry.id}"
+    print(f"\n🎉🎉🎉 Upload successful of {file_path} to {video_url}")
 
     file_data.close()
+
+    return video_url
 
 
 

@@ -18,7 +18,7 @@ MY_USER_SECRET = os.getenv("user_secret")
 MY_ADMIN_SECRET = os.getenv("admin_secret")
 MY_PARTNER_ID = os.getenv("partner_id")
 
-def list_kaltura_categories(USER_SECRET, ADMIN_SECRET, PARTNER_ID):
+def list_kaltura_categories(show="all",USER_SECRET=None, ADMIN_SECRET=None, PARTNER_ID=None):
     """
     Lists categories from Kaltura KMS, focusing on those within the KMS Channel.
     
@@ -52,9 +52,15 @@ def list_kaltura_categories(USER_SECRET, ADMIN_SECRET, PARTNER_ID):
     # Filter for categories within KMS Channel
     channel_categories = []
     for category in result.objects:
-        if category.fullName.startswith("MediaSpace>site>channels"):
+        if show == "all":
+            print(f"\nℹ️  Showing all categories. Update the 'show' argument to 'kms_only' to show only categories within KMS Channel.")
             channel_categories.append(category)
             print(f"{category.id:<15}{category.name:<40}{category.fullName}")
+        elif show == "kms_only": 
+            print(f"\nℹ️  Showing only categories within KMS Channel. Update the 'show' argument to 'all' to show all categories.")
+            if category.fullName.startswith("MediaSpace>site>channels"):
+                channel_categories.append(category)
+                print(f"{category.id:<15}{category.name:<40}{category.fullName}")
 
 
 
@@ -64,11 +70,11 @@ def list_kaltura_categories(USER_SECRET, ADMIN_SECRET, PARTNER_ID):
 if __name__ == "__main__":
 
     print(f"\n\nPRINTING ONLY CATEGORIES WITHIN KMS CHANNEL:\n")
-    categories = list_kaltura_categories(MY_USER_SECRET, MY_ADMIN_SECRET, MY_PARTNER_ID)
+    categories = list_kaltura_categories(show="all", USER_SECRET=MY_USER_SECRET, ADMIN_SECRET=MY_ADMIN_SECRET, PARTNER_ID=MY_PARTNER_ID)
     print(f"\n{len(categories)} categories found in KMS\n")
 
-    print(type(categories))
-    print(categories)
+    # print(type(categories))
+    # print(categories)
     # "category.id:<15}{category.name:<40}{category.fullName"
 
     # End timing

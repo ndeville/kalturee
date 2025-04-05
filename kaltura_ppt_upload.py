@@ -297,14 +297,15 @@ def upload_ppt_to_kaltura(file_path, channel_id=None, demo_mode=False, ppt_thumb
     
     document_url = f"https://nicolas.mediaspace.kaltura.com/media/{document_entry.id}"
     # Print the URL of the uploaded document
-    print(f"\n✅ Upload successful of '{document_entry.name}':\n\n{document_url}\n\n")
-    # Copy document URL to clipboard
-    subprocess.run(['pbcopy'], input=document_url.encode('utf-8'))
-    print("✅ Document URL copied to clipboard")
+    print(f"\n🎉🎉🎉 Upload successful of {file_path} with title '{document_entry.name} at {document_url}\n\n")
+    if not demo_mode:
+        # Copy document URL to clipboard
+        subprocess.run(['pbcopy'], input=document_url.encode('utf-8'))
+        print("✅ Document URL copied to clipboard")
 
     file_data.close()
 
-
+    return document_url
 if __name__ == "__main__":
 
     KMS = "Pharma"

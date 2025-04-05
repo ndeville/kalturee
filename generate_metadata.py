@@ -267,7 +267,7 @@ Make sure that the output does not have any Markdown formatting.
         # Remove any quotes (single or double) at the beginning or end of the description
         video_description = video_description.strip('"\'')
 
-        print(f"\tℹ️   Description generated with {len(video_description)} chars (using {llm_model_for_description}):\n{video_description}")
+        print(f"\nℹ️   Description generated with {len(video_description)} chars (using {llm_model_for_description}):\n{video_description}")
 
         # Create a _description.txt file and write the video description into it
         description_file_path = video_path.rsplit(".", 1)[0] + "_description.txt"
@@ -275,9 +275,9 @@ Make sure that the output does not have any Markdown formatting.
         try:
             with open(description_file_path, 'w', encoding='utf-8') as description_file:
                 description_file.write(video_description)
-            print(f"✅ Description saved to: {description_file_path}")
+            print(f"\n✅ Description saved to: {description_file_path}")
         except Exception as e:
-            print(f"❌ Error saving description to file: {str(e)}")
+            print(f"\n❌ Error saving description to file: {str(e)}")
 
         return video_description
     

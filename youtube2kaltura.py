@@ -30,7 +30,7 @@ new_thumbnail = True # Generate new thumbnail randomly if True, otherwise extrac
 pptx_path = "/Users/nic/demo/pharma/pharma-demo-deck.pptx" # filename needs to end with "-deck.pptx"
 background_image_path = "/Users/nic/demo/pharma/pharma-empty-background.jpg" # 1920x1080
 theme_for_pptx_generation = "write about a random medical topic"
-num_presentations = 5
+num_presentations = 20
 
 target_languages = [
     "EN",
