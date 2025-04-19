@@ -16,6 +16,7 @@ import subprocess
 from kaltura_ppt_upload import upload_ppt_to_kaltura
 # from generate_metadata import generate_description
 # from generate_thumbnails import generate_pptx_thumbnail
+import ollama
 
 # Start Chrono
 start_time = time.time()

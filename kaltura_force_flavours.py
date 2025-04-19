@@ -17,7 +17,7 @@ print(f"\n---------- {ts_time} starting {os.path.basename(__file__)}")
 from KalturaClient import *
 from KalturaClient.Plugins.Core import *
 
-KMS = "Pharma"
+KMS = "MY_KMS"
 
 # Credentials
 # Set up Kaltura credentials based on the selected KMS
