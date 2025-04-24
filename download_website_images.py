@@ -31,6 +31,13 @@ from bs4 import BeautifulSoup
 from PIL import Image
 from io import BytesIO
 
+import os
+from pathlib import Path
+from PIL import Image
+import imagehash
+
+
+
 # GLOBALS
 
 test = 1
@@ -43,6 +50,34 @@ count = 0
 
 # FUNCTIONS
 
+def perceptual_hash(image_path):
+    try:
+        with Image.open(image_path) as img:
+            return imagehash.phash(img)
+    except Exception:
+        return None
+
+def delete_duplicate_images(folder_path, threshold=5):
+    seen_hashes = {}
+    folder = Path(folder_path)
+
+    for ext in ('*.jpg', '*.jpeg', '*.png'):
+        for image_path in folder.rglob(ext):
+            img_hash = perceptual_hash(image_path)
+            if img_hash is None:
+                continue
+
+            duplicate_found = False
+            for existing_hash in seen_hashes:
+                if abs(img_hash - existing_hash) <= threshold:
+                    os.remove(image_path)
+                    duplicate_found = True
+                    break
+
+            if not duplicate_found:
+                seen_hashes[img_hash] = image_path
+
+
 
 def download_image(session, url, folder):
     try:
@@ -50,54 +85,81 @@ def download_image(session, url, folder):
         response = session.get(url, stream=True)
         response.raise_for_status()
         
-        # Get image dimensions using PIL
-        img = Image.open(BytesIO(response.content))
-        width, height = img.size
+        # Get content type from response headers
+        content_type = response.headers.get('content-type', '').lower()
         
-        # Skip if image is too small
-        if width < 1000 and height < 1000:
-            print(f"Skipping {url}: Image too small ({width}x{height})")
+        # Skip if not an image
+        if not content_type.startswith('image/'):
+            print(f"ℹ️  Skipping non-image file: {url} (Content-Type: {content_type})")
             return
-
-        # Resize image if larger than 1920x1080 while maintaining aspect ratio
-        if width > 1920 or height > 1080:
-            ratio = min(1920 / width, 1080 / height)
-            new_width = int(width * ratio)
-            new_height = int(height * ratio)
-            img = img.resize((new_width, new_height), Image.LANCZOS)
-            width, height = img.size
-            print(f"Resized image to {width}x{height}")
-
+            
         # Get original filename
         filename = os.path.basename(urlparse(url).path)
         if not filename:
             filename = "image"
             
-        # Add width to filename
-        name, ext = os.path.splitext(filename)
-        
-        # Convert webp to jpg
-        if ext.lower() == '.webp':
-            ext = '.jpg'
-            # Convert to RGB mode if needed (for PNG/WEBP with transparency)
-            if img.mode in ('RGBA', 'LA', 'P'):
-                img = img.convert('RGB')
-        
-        filename = f"{width}_{name}{ext}"
-        
-        filepath = os.path.join(folder, filename)
-        count = 1
-        original_filepath = filepath
-        while os.path.exists(filepath):
-            name, ext = os.path.splitext(original_filepath)
-            filepath = f"{name}_{count}{ext}"
-            count += 1
-        
-        # Save the image we already loaded
-        img.save(filepath)
-        print(f"Downloaded: {filepath} ({width}x{height})")
+        # Handle SVG files differently
+        if url.lower().endswith('.svg') or content_type.endswith('svg+xml'):
+            filepath = os.path.join(folder, filename)
+            # Save SVG directly
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            print(f"✅ Downloaded SVG: {filepath}")
+            return
+            
+        try:
+            # For raster images, process dimensions
+            img = Image.open(BytesIO(response.content))
+            width, height = img.size
+            
+            # Skip if image is too small
+            if width < 1000 and height < 1000:
+                print(f"Skipping {url}: Image too small ({width}x{height})")
+                return
+
+            # Resize image if larger than 1920x1080 while maintaining aspect ratio
+            if width > 1920 or height > 1080:
+                ratio = min(1920 / width, 1080 / height)
+                new_width = int(width * ratio)
+                new_height = int(height * ratio)
+                img = img.resize((new_width, new_height), Image.LANCZOS)
+                width, height = img.size
+                print(f"Resized image to {width}x{height}")
+
+            # Add width to filename
+            name, ext = os.path.splitext(filename)
+            
+            # Convert webp to jpg
+            if ext.lower() == '.webp':
+                ext = '.jpg'
+                # Convert to RGB mode if needed (for PNG/WEBP with transparency)
+                if img.mode in ('RGBA', 'LA', 'P'):
+                    img = img.convert('RGB')
+            
+            filename = f"{width}x{height}_{name}{ext}"
+            
+            filepath = os.path.join(folder, filename)
+            count = 1
+            original_filepath = filepath
+            while os.path.exists(filepath):
+                name, ext = os.path.splitext(original_filepath)
+                filepath = f"{name}_{count}{ext}"
+                count += 1
+            
+            # Save the image we already loaded
+            img.save(filepath)
+            print(f"✅ Downloaded: {filepath} ({width}x{height})")
+            
+        except Exception as e:
+            # If PIL can't process the image, save it as-is
+            print(f"ℹ️  Saving image without processing: {url}")
+            filepath = os.path.join(folder, filename)
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            print(f"✅ Downloaded: {filepath}")
+            
     except Exception as e:
-        print(f"Failed to download {url}: {e}")
+        print(f"❌ Failed to download {url}: {str(e)}")
 
 def get_domain(url):
     """Extract the domain from a URL"""
@@ -122,8 +184,9 @@ def get_all_links(session, url, base_domain):
         
         return links
     except Exception as e:
-        print(f"Failed to get links from {url}: {e}")
+        print(f"❌ Failed to get links from {url}: {e}")
         return set()
+
 
 def download_all_images(website_url, max_pages=100):
     # Extract the root domain without the TLD
@@ -134,7 +197,7 @@ def download_all_images(website_url, max_pages=100):
     else:
         slug = domain_parts[0]  # Fallback if there's only one part
     
-    folder = f"/Users/nic/Downloads/temp/downloaded_images/{slug}/"
+    folder = f"/Users/nic/demo/{slug}/"
     os.makedirs(folder, exist_ok=True)
     session = requests.Session()
     base_domain = get_domain(website_url)
@@ -149,7 +212,7 @@ def download_all_images(website_url, max_pages=100):
         if current_url in visited_pages:
             continue
             
-        print(f"\nProcessing page: {current_url}")
+        print(f"\nℹ️  Processing page: {current_url}")
         visited_pages.add(current_url)
         
         # Get all links from the current page
@@ -175,24 +238,28 @@ def download_all_images(website_url, max_pages=100):
                 download_image(session, url, folder)
                 
         except Exception as e:
-            print(f"Failed to process page {current_url}: {e}")
+            print(f"❌ Failed to process page {current_url}: {e}")
             continue
         
         print(f"Processed {len(visited_pages)} pages. {len(pending_pages)} pages remaining in queue.")
 
-
+    return folder
 
 
 # MAIN
 
-website = "https://www.viterra.com"
+# website = "https://www.viterra.com"
+website = input("\nEnter the website URL: ")
 
 vpn_connection = my_utils.connect_vpn()
 
 if vpn_connection:
-    download_all_images(website, max_pages=500)  
+    output_path = download_all_images(website, max_pages=3000)  
 else:
     print("\n❌ Failed to connect to VPN")
+
+delete_duplicate_images(output_path)
+
 
 my_utils.disconnect_vpn()
 
