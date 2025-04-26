@@ -1,5 +1,5 @@
 """
-AUTOMATED YOUTUBE VIDEO DOWNLOAD & UPLOAD TO KALTURA KMC
+AUTOMATED YOUTUBE VIDEO DOWNLOAD & UPLOAD TO KALTURA KMS
 1) download a Youtube URL (video/playlist/channel) to a folder (incl. videos & metadata JSON)
 2) download captions OR generate captions for each video, in different languages
 3) download official Youtube thumbnail for each video OR generate a .jpg for each video
@@ -20,26 +20,22 @@ load_dotenv()
 test = False
 verbose = False
 
-project_name = "lcl"
-source_language = "FR"
+project_name = "ca"
 
-download_youtube_videos = False # False to only do post-processing steps from saved files
-youtube_channel_url = "https://www.youtube.com/@lcl"
-
-max_videos_to_upload = 100
+max_videos_to_upload = 1000
 start_with = "longest_first" # "shortest_first" or "longest_first"
 new_thumbnail = True # Generate new thumbnail randomly if True, otherwise extract from _json if available (else generate a new one anyway)
 
 # PPTX
 pptx_path = "/Users/nic/demo/pharma/pharma-demo-deck.pptx" # filename needs to end with "-deck.pptx"
-background_image_path = "/Users/nic/demo/lcl/1920x1080_Z50GxpbqstJ9-Gpl_image-1-.jpg" # 1920x1080
-theme_for_pptx_generation = "write about a random financial topic for the bank LCL, in French"
-num_presentations = 5
+background_image_path = "/Users/nic/demo/pharma/pharma-empty-background.jpg" # 1920x1080
+theme_for_pptx_generation = "write about a random financial topic, in French"
+num_presentations = 20
 
 target_languages = [
     "EN",
-    # "FR",
-    # "DE",
+    "FR",
+    "DE",
     # "ES",
     # "CN",
     # "IT",
@@ -47,103 +43,147 @@ target_languages = [
     # "AR",
 ]
 
-# KMC
-KMC = "CA" # "Pharma" or "MY_KMC" or "CA"
-KMS = 376311372 # = Parent ID (upload a video manually and check the parent ID in KMC. Or list all categories and find the rootCategory ID)
+# KMS
+KMS = "CA" # "Pharma" or "MY_KMS" or "CA"
 
 CHANNELS = {
-    "Accueil": [],
+    "Home": [],
 
-    "Métiers & Réseaux": [
+    "Therapeutic Areas": [
         {
-            "label": "Agences & Réseau Commercial",
-            "description": "Témoignages du terrain, retours d’expérience et partages de bonnes pratiques des conseillers et directeurs d’agences partout en France.",
+            "label": "Oncology",
+            "description": "Comprehensive content covering the latest advancements, treatment strategies, emerging therapies, and clinical insights in the field of oncology, designed to support healthcare professionals treating cancer patients.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Banque Privée & Clientèle Patrimoniale",
-            "description": "Vidéos sur les offres patrimoniales, la relation client haut de gamme, et les formations métiers pour les conseillers Banque Privée.",
+            "label": "Cardiology",
+            "description": "Educational resources on cardiovascular health, including innovations in diagnosis, prevention strategies, clinical interventions, and updates from cardiology research and practice.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Marché des Professionnels & Entreprises",
-            "description": "Contenus dédiés à la gestion de la relation avec les professionnels, PME et grandes entreprises : cas clients, offres, et retours d’expérience terrain.",
+            "label": "Neurology",
+            "description": "Expert-led sessions and research updates on neurological disorders, including content on diagnosis, disease management, and breakthrough treatments for conditions affecting the brain and nervous system.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Endocrinology",
+            "description": "Content centered on hormonal and metabolic disorders, with a focus on diabetes, thyroid diseases, and other endocrine conditions, alongside clinical guidelines and treatment innovations.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ],
 
-    "Vie Interne & Culture d’Entreprise": [
+    "Expert Exchange": [
         {
-            "label": "Paroles de Managers",
-            "description": "Messages vidéo des membres du COMEX, directeurs régionaux et chefs de projet sur les grandes orientations et les projets prioritaires.",
+            "label": "KOL Interviews & Fireside Chats",
+            "description": "Engaging interviews and informal discussions with Key Opinion Leaders across medical specialties, offering expert perspectives on current trends, challenges, and innovations in healthcare.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Vie LCL",
-            "description": "Vidéos sur les événements internes, initiatives locales, moments de convivialité ou actions solidaires portées par les collaborateurs.",
+            "label": "HCP Roundtables & Panel Discussions",
+            "description": "Dynamic group conversations among healthcare professionals on relevant clinical topics, offering diverse viewpoints, case sharing, and peer-to-peer learning opportunities.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "RSE & Inclusion",
-            "description": "Focus sur les engagements RSE, la diversité, l’inclusion et les actions sociétales soutenues par LCL dans ses territoires.",
+            "label": "Case Discussions",
+            "description": "Interactive sessions featuring detailed case studies that explore real-world scenarios, diagnostic challenges, and treatment pathways to support applied clinical decision-making.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Ask-the-Expert Sessions",
+            "description": "Live and on-demand Q&A sessions where clinicians can hear directly from leading experts as they address common questions and provide clarity on complex medical issues.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ],
 
-    "Formation & Développement": [
+    "Clinical Resources": [
         {
-            "label": "Formations Métiers",
-            "description": "Modules de formation vidéo pour accompagner la montée en compétences : produits, offres, posture commerciale, conformité…",
+            "label": "Guidelines & Best Practices",
+            "description": "Up-to-date clinical guidelines, protocols, and best practice recommendations across therapeutic areas to aid in evidence-based patient care and standardized treatment delivery.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Onboarding",
-            "description": "Parcours d’intégration pour les nouveaux collaborateurs, avec les essentiels pour bien démarrer chez LCL.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Compétences Transverses",
-            "description": "Développement personnel, gestion du stress, communication, numérique… des contenus pour progresser au quotidien.",
+            "label": "Continuing Medical Education (CME)",
+            "description": "Certified educational content designed for healthcare professionals seeking to earn CME credits while staying current on clinical practices and medical innovations.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ],
 
-    "Stratégie & Projets": [
+    "Patient Perspectives": [
         {
-            "label": "Stratégie LCL",
-            "description": "Explications et points d’étape sur les grands chantiers stratégiques, projets d’innovation, et la transformation digitale de la banque.",
+            "label": "Patient Journey Videos",
+            "description": "Compelling visual narratives highlighting individual patient experiences from diagnosis to treatment, illustrating the human side of healthcare and therapeutic impact.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Projets & Innovations",
-            "description": "Zoom sur les nouvelles offres, services digitaux, outils internes ou expériences client innovantes lancées au sein du réseau ou des fonctions support.",
+            "label": "Living with Disease – First-Person Stories",
+            "description": "Personal accounts from patients living with chronic or serious illnesses, shedding light on daily challenges, emotional resilience, and the support systems around them.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Caregiver Voices",
+            "description": "Stories and reflections from caregivers who provide emotional, physical, and logistical support to patients, offering insights into their vital role in the care continuum.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ],
 
-    "Live & Replays": [
+    "Innovation & Research": [
         {
-            "label": "Événements Live",
-            "description": "Diffusions en direct des townhalls, webinaires métiers, comités internes et événements de mobilisation nationale ou régionale.",
+            "label": "Clinical Trial Insights",
+            "description": "Highlights from ongoing and completed clinical trials, including study design, key findings, and implications for clinical practice and future research directions.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Replays à la Demande",
-            "description": "Bibliothèque de replays pour revoir à tout moment les communications clés, conférences internes et modules de formation passés.",
+            "label": "Real World Evidence Highlights",
+            "description": "Summaries of observational data and outcomes derived from real-world clinical settings, offering valuable insights beyond randomized trials for everyday patient care.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Medical Affairs-Led Innovation",
+            "description": "Exploration of innovative initiatives and strategic programs led by medical affairs teams, demonstrating their role in advancing science and improving healthcare delivery.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        }
+    ],
+
+    "Live & Upcoming": [
+        {
+            "label": "Upcoming Webinars & Events",
+            "description": "Stay informed about scheduled live webinars, workshops, and virtual events featuring experts and interactive learning experiences across medical disciplines.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Key Congress On-Demand",
+            "description": "On-demand access to presentations, abstracts, and expert commentary from major international medical congresses, providing key takeaways and post-event insights.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Medical Events & Summits",
+            "description": "Coverage of high-impact medical events, including regional and global summits, with curated sessions that spotlight current research and clinical priorities.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Replay Library",
+            "description": "A curated library of past webinars, interviews, and discussions available for on-demand viewing, offering flexible learning opportunities anytime, anywhere.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ]
 }
 
-
 # Credentials
-# Set up Kaltura credentials based on the selected KMC
-if KMC == "CA":
-    USER_SECRET = os.getenv("ca_user_secret")
-    ADMIN_SECRET = os.getenv("ca_admin_secret")
-    PARTNER_ID = os.getenv("ca_partner_id")
+# Set up Kaltura credentials based on the selected KMS
+if KMS == "MY_KMS":
+    USER_SECRET = os.getenv("user_secret")
+    ADMIN_SECRET = os.getenv("admin_secret")
+    PARTNER_ID = os.getenv("partner_id")
+elif KMS == "Pharma":
+    USER_SECRET = os.getenv("pharma_user_secret")
+    ADMIN_SECRET = os.getenv("pharma_admin_secret")
+    PARTNER_ID = os.getenv("pharma_partner_id")
+elif KMS == "ABB":
+    USER_SECRET = os.getenv("abb_user_secret")
+    ADMIN_SECRET = os.getenv("abb_admin_secret")
+    PARTNER_ID = os.getenv("abb_partner_id")
 else:
-    print(f"❌ Error: Unknown KMC '{KMC}'. Please check your configuration.")
+    print(f"❌ Error: Unknown KMS '{KMS}'. Please check your configuration.")
     exit()
 
 OWNER = "nicolas.deville@kaltura.com"
@@ -160,7 +200,7 @@ print(f"Max videos to upload:\t{max_videos_to_upload}")
 print(f"Upload order:\t\t{start_with}")
 print(f"Generate new thumbnails\t{'Yes' if new_thumbnail else 'No, use existing when available'}")
 print(f"Target languages:\t{', '.join(target_languages)}")
-print(f"KMC:\t\t\t{KMC}")
+print(f"KMS:\t\t\t{KMS}")
 print(f"PPTX path:\t\t{pptx_path}")
 print(f"PPTX theme:\t\t{theme_for_pptx_generation}")
 print(f"# of presentations:\t{num_presentations}")
@@ -171,8 +211,6 @@ for category, channels in CHANNELS.items():
     print(f"  {category:30}{len(channels)} channels")
 
 print("\nCredentials:")
-print(f"USER_SECRET: {USER_SECRET}")
-print(f"ADMIN_SECRET: {ADMIN_SECRET}")
 print(f"Partner ID: {PARTNER_ID}")
 print(f"Owner: {OWNER}")
 print("User and Admin secrets: Configured")
@@ -211,7 +249,6 @@ import json
 import requests
 from generate_thumbnails import generate_video_thumbnail
 
-import generate_metadata
 
 import ytdownload_videos
 import kaltura_video_upload
@@ -232,64 +269,14 @@ from generate_thumbnails import generate_video_thumbnail
 count = 0
 count_video_uploaded = 0
 
-
-# # CREATE MISSING CHANNELS IN KMS
-
-# from kaltura_list_categories import list_kaltura_categories
-# from kaltura_create_channels import create_multiple_categories
-
-# print("\n\n⚙️  Checking for missing channels in KMS...")
-
-# # Get existing categories/channels from Kaltura
-# existing_categories = list_kaltura_categories(show="kms_only", USER_SECRET=USER_SECRET, ADMIN_SECRET=ADMIN_SECRET, PARTNER_ID=PARTNER_ID)
-
-# # Create a dictionary of existing category names for easy lookup
-# existing_category_names = {category.name: category.id for category in existing_categories}
-
-# # Prepare list of channels to create
-# channels_to_create = []
-
-# # Check each channel in the CHANNELS dictionary
-# for main_channel, sub_channels in CHANNELS.items():
-#     # Check if main channel exists
-#     if main_channel not in existing_category_names:
-#         print(f"  ➕ Main channel '{main_channel}' needs to be created")
-#         channels_to_create.append({
-#             "name": main_channel,
-#             "description": generate_channel_description(main_channel) if callable(generate_channel_description) else ""
-#         })
-    
-#     # Check sub-channels
-#     for sub_channel in sub_channels:
-#         if sub_channel["label"] not in existing_category_names:
-#             print(f"  ➕ Sub-channel '{sub_channel['label']}' needs to be created")
-#             channels_to_create.append({
-#                 "name": sub_channel["label"],
-#                 "description": sub_channel.get("description", "")
-#             })
-
-# # Create missing channels if any
-# if channels_to_create:
-#     print(f"\n⚙️  Creating {len(channels_to_create)} missing channels...")
-#     created, failed = create_multiple_categories(channels_to_create)
-#     print(f"  ✅ Successfully created {len(created)} channels")
-#     if failed:
-#         print(f"  ❌ Failed to create {len(failed)} channels: {', '.join(failed)}")
-# else:
-#     print("  ✅ All channels already exist in KMS")
-
-# # Get updated list of channels after creation
-# all_channels = {category.name: category.id for category in list_kaltura_categories(show="kms_only", USER_SECRET=USER_SECRET, ADMIN_SECRET=ADMIN_SECRET, PARTNER_ID=PARTNER_ID)}
-# print(f"\n⚙️  Total channels available in KMS: {len(all_channels)}")
-
-
-
-
 # DOWNLOAD YOUTUBE VIDEOS
 
+download_youtube_videos = False # False to only do post-processing steps from saved files
+youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe"
+
+
 if download_youtube_videos:
-    print(f"\n\n⚙️  Downloading videos from YouTube channel {youtube_channel_url}")
-    youtube_download_path_with_files = ytdownload_videos.process_youtube_channel(youtube_channel_url)
+    youtube_download_path_with_files = ytdownload_videos.process_youtube_url_to_download(youtube_url)
     print(f"\n\n{youtube_download_path_with_files=}")
 else:
     youtube_download_path_with_files = f"/Users/nic/dl/yt/{project_name}"
@@ -297,11 +284,10 @@ else:
 if test:
     youtube_download_path_with_files = f"/Users/nic/dl/yt/test"
 
-print(f"\n\n⚙️  Download job finished. Processing files in {youtube_download_path_with_files}\n\n")
-
-
+print(f"\n\n⚙️  Processing files in {youtube_download_path_with_files}")
 
 # JSON
+
 
 
 # EN CAPTIONS
@@ -480,14 +466,15 @@ else:
         print("\nℹ️  Skipping translations - No additional languages specified")
 
 
-
-
 # TITLE
 """each .mp4 file needs to have a _title.txt file with the title of the video inside"""
 
 # IMPLEMENT LOGIC FOR MAX title LENGTH WITH A LOOP THAT REDOES IT
 
-def generate_titles(folder_path, source_language="EN"):
+def generate_titles(folder_path):
+
+    import os
+    import generate_metadata
     
     mp4_files = glob.glob(os.path.join(folder_path, "*.mp4"))
     
@@ -517,7 +504,7 @@ def generate_titles(folder_path, source_language="EN"):
         
         try:
             print(f"\nTITLE #{count_file_for_title_generation}/{total_files_to_process_for_title_generation}")
-            title_file_path = generate_metadata.generate_title(mp4_file, source_language=source_language)
+            title = generate_metadata.generate_title(mp4_file)
             results[mp4_file] = title_file_path
         except Exception as e:
             print(f"  ❌ Error generating title for {mp4_file}: {str(e)}")
@@ -525,14 +512,14 @@ def generate_titles(folder_path, source_language="EN"):
     return results
 
 # Generate titles for all MP4 files in the download folder
-generate_titles(youtube_download_path_with_files, source_language)
+generate_titles(youtube_download_path_with_files)
 
 
 
 # DESCRIPTION
 """each .mp4 file needs to have a _description.txt file with the description of the video inside"""
 
-def generate_descriptions(folder_path, source_language="EN"):
+def generate_descriptions(folder_path):
 
     import os
     import generate_metadata
@@ -574,7 +561,7 @@ def generate_descriptions(folder_path, source_language="EN"):
         
         print(f"\nDESCRIPTION #{count_file_for_description_generation}/{total_files_to_process_for_description_generation}\n")
         # try:
-        description_file_path = generate_metadata.generate_description(mp4_file, based_on="filename", source_language=source_language)
+        description = generate_metadata.generate_description(mp4_file)
             # print(f"  ✅ Description generated successfully")
         results[mp4_file] = description_file_path
         # except Exception as e:
@@ -583,7 +570,7 @@ def generate_descriptions(folder_path, source_language="EN"):
     return results
 
 # Generate descriptions for all MP4 files in the download folder
-generate_descriptions(youtube_download_path_with_files, source_language)
+generate_descriptions(youtube_download_path_with_files)
 
 
 
@@ -636,7 +623,7 @@ def generate_tags(folder_path):
         
         print(f"\nTAGS #{count_file_for_tags_generation}/{total_files_to_process_for_tags_generation}")
         # try:
-        tags = generate_metadata.generate_tags(mp4_file, based_on="filename", source_language=source_language)
+        tags = generate_metadata.generate_tags(mp4_file)
         #     print(f"  ✅ Tags generated successfully")
         results[mp4_file] = tags_file_path  
         # except Exception as e:
@@ -684,7 +671,7 @@ if new_thumbnail:
             print(f"  🔄 Generating thumbnail for: {video_name}")
             try:
                 generate_video_thumbnail(mp4_file)
-                # print(f"  ✅ Thumbnail generated successfully")
+                print(f"  ✅ Thumbnail generated successfully")
                 results[mp4_file] = thumbnail_file_path
             except Exception as e:
                 print(f"  ❌ Error generating thumbnail for {video_name}: {str(e)}")

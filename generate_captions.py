@@ -39,7 +39,8 @@ def generate_en_srt(mp4_path):
     output_dir = os.path.dirname(mp4_path)
     
     # WhisperX Configuration
-    LANGUAGE = "en"
+    
+    # LANGUAGE = "en"
     VERBOSE = "False"
     MODEL = "turbo"
     MODEL_CACHE_ONLY = "False"

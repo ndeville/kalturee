@@ -14,9 +14,13 @@ ts_time = f"{datetime.now().strftime('%H:%M:%S')}"
 
 # Credentials
 load_dotenv()
-MY_USER_SECRET = os.getenv("user_secret")
-MY_ADMIN_SECRET = os.getenv("admin_secret")
-MY_PARTNER_ID = os.getenv("partner_id")
+# MY_USER_SECRET = os.getenv("user_secret")
+# MY_ADMIN_SECRET = os.getenv("admin_secret")
+# MY_PARTNER_ID = os.getenv("partner_id")
+MY_USER_SECRET = os.getenv("ca_user_secret")
+MY_ADMIN_SECRET = os.getenv("ca_admin_secret")
+MY_PARTNER_ID = os.getenv("ca_partner_id")
+
 
 def list_kaltura_categories(show="all",USER_SECRET=None, ADMIN_SECRET=None, PARTNER_ID=None):
     """

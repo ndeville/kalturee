@@ -197,7 +197,7 @@ def format_duration(seconds):
 # MAIN
 
 # Example usage
-youtube_channel_url = "https://www.youtube.com/@abb"  # Replace with your desired YouTube channel
+youtube_channel_url = "https://www.youtube.com/@GroupeCreditAgricole"  # Replace with your desired YouTube channel
 video_limit = None  # Set to None to get all videos, or a number to limit results
 
 # Get videos from the channel

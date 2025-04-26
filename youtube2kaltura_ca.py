@@ -1,5 +1,5 @@
 """
-AUTOMATED YOUTUBE VIDEO DOWNLOAD & UPLOAD TO KALTURA KMC
+AUTOMATED YOUTUBE VIDEO DOWNLOAD & UPLOAD TO KALTURA KMS
 1) download a Youtube URL (video/playlist/channel) to a folder (incl. videos & metadata JSON)
 2) download captions OR generate captions for each video, in different languages
 3) download official Youtube thumbnail for each video OR generate a .jpg for each video
@@ -20,11 +20,11 @@ load_dotenv()
 test = False
 verbose = False
 
-project_name = "lcl"
+project_name = "ca"
 source_language = "FR"
 
 download_youtube_videos = False # False to only do post-processing steps from saved files
-youtube_channel_url = "https://www.youtube.com/@lcl"
+youtube_channel_url = "https://www.youtube.com/@GroupeCreditAgricole"
 
 max_videos_to_upload = 100
 start_with = "longest_first" # "shortest_first" or "longest_first"
@@ -32,8 +32,8 @@ new_thumbnail = True # Generate new thumbnail randomly if True, otherwise extrac
 
 # PPTX
 pptx_path = "/Users/nic/demo/pharma/pharma-demo-deck.pptx" # filename needs to end with "-deck.pptx"
-background_image_path = "/Users/nic/demo/lcl/1920x1080_Z50GxpbqstJ9-Gpl_image-1-.jpg" # 1920x1080
-theme_for_pptx_generation = "write about a random financial topic for the bank LCL, in French"
+background_image_path = "/Users/nic/demo/pharma/pharma-empty-background.jpg" # 1920x1080
+theme_for_pptx_generation = "write about a random financial topic, in French"
 num_presentations = 5
 
 target_languages = [
@@ -47,103 +47,116 @@ target_languages = [
     # "AR",
 ]
 
-# KMC
-KMC = "CA" # "Pharma" or "MY_KMC" or "CA"
-KMS = 376311372 # = Parent ID (upload a video manually and check the parent ID in KMC. Or list all categories and find the rootCategory ID)
+# KMS
+KMS = "CA" # "Pharma" or "MY_KMS" or "CA"
 
 CHANNELS = {
     "Accueil": [],
 
-    "Métiers & Réseaux": [
+    "Métiers & Activités": [
         {
-            "label": "Agences & Réseau Commercial",
-            "description": "Témoignages du terrain, retours d’expérience et partages de bonnes pratiques des conseillers et directeurs d’agences partout en France.",
+            "label": "Banque de détail & Caisses régionales",
+            "description": "Vidéos sur les projets, innovations et initiatives locales des Caisses régionales et de la banque de détail, illustrant la proximité avec les clients et les territoires.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Banque Privée & Clientèle Patrimoniale",
-            "description": "Vidéos sur les offres patrimoniales, la relation client haut de gamme, et les formations métiers pour les conseillers Banque Privée.",
+            "label": "Banque d’investissement (CACIB)",
+            "description": "Contenus relatifs aux activités de financement, marchés de capitaux, et projets structurants menés par Crédit Agricole Corporate & Investment Bank (CACIB).",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Marché des Professionnels & Entreprises",
-            "description": "Contenus dédiés à la gestion de la relation avec les professionnels, PME et grandes entreprises : cas clients, offres, et retours d’expérience terrain.",
+            "label": "Assurance & Épargne",
+            "description": "Présentation des offres, évolutions réglementaires, et formations autour des activités de Crédit Agricole Assurances (CAA) et de Crédit Agricole Titres (CAT).",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Paiements & Financements spécialisés",
+            "description": "Initiatives autour des solutions de paiement, leasing, factoring, et mobilité (CAPS, CALF, CAPFM), incluant témoignages et démonstrations produit.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ],
 
-    "Vie Interne & Culture d’Entreprise": [
+    "Paroles d’experts": [
         {
-            "label": "Paroles de Managers",
-            "description": "Messages vidéo des membres du COMEX, directeurs régionaux et chefs de projet sur les grandes orientations et les projets prioritaires.",
+            "label": "Interviews & Regards croisés",
+            "description": "Interviews d’experts métiers, dirigeants, ou partenaires sur les grands enjeux du Groupe : transformation digitale, finance durable, cybersécurité, etc.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Vie LCL",
-            "description": "Vidéos sur les événements internes, initiatives locales, moments de convivialité ou actions solidaires portées par les collaborateurs.",
+            "label": "Tables rondes & Débats",
+            "description": "Captations de discussions multi-voix entre entités, filiales ou experts externes, pour faire émerger des points de vue croisés sur les grands défis bancaires.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "RSE & Inclusion",
-            "description": "Focus sur les engagements RSE, la diversité, l’inclusion et les actions sociétales soutenues par LCL dans ses territoires.",
+            "label": "Retours d’expérience terrain",
+            "description": "Témoignages des collaborateurs sur la mise en œuvre de projets ou d’initiatives concrètes dans les agences, sièges ou centres de services.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Sessions Ask-Me-Anything",
+            "description": "Séances interactives avec des experts internes, ouvertes aux collaborateurs pour poser des questions en direct sur des sujets métiers ou stratégiques.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ],
 
-    "Formation & Développement": [
+    "Ressources & Formation": [
         {
-            "label": "Formations Métiers",
-            "description": "Modules de formation vidéo pour accompagner la montée en compétences : produits, offres, posture commerciale, conformité…",
+            "label": "Formations & e-learning",
+            "description": "Modules vidéo de formation sur les produits, réglementations (KYC, LCB-FT, RGPD), outils internes, et onboarding des nouveaux collaborateurs.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Onboarding",
-            "description": "Parcours d’intégration pour les nouveaux collaborateurs, avec les essentiels pour bien démarrer chez LCL.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        },
-        {
-            "label": "Compétences Transverses",
-            "description": "Développement personnel, gestion du stress, communication, numérique… des contenus pour progresser au quotidien.",
+            "label": "Référentiels métiers & bonnes pratiques",
+            "description": "Contenus de référence à destination des équipes métiers : process, guides pratiques, cas d’usage, support à la montée en compétence continue.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ],
 
-    "Stratégie & Projets": [
+    "Communication interne": [
         {
-            "label": "Stratégie LCL",
-            "description": "Explications et points d’étape sur les grands chantiers stratégiques, projets d’innovation, et la transformation digitale de la banque.",
+            "label": "Messages de la Direction",
+            "description": "Prises de parole régulières de la direction générale (CA-GIP, CASA, LCL…) sur la stratégie, les priorités ou les résultats du Groupe.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Projets & Innovations",
-            "description": "Zoom sur les nouvelles offres, services digitaux, outils internes ou expériences client innovantes lancées au sein du réseau ou des fonctions support.",
+            "label": "Vie du Groupe",
+            "description": "Vidéos événementielles, reportages internes, témoignages collaborateurs autour de la culture d’entreprise et de la vie au sein du Groupe CA.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "RSE & Transition Énergétique",
+            "description": "Contenus autour des engagements sociétaux, environnementaux et solidaires du Groupe : transition énergétique, inclusion, finance durable, etc.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ],
 
-    "Live & Replays": [
+    "En direct & Replays": [
         {
-            "label": "Événements Live",
-            "description": "Diffusions en direct des townhalls, webinaires métiers, comités internes et événements de mobilisation nationale ou régionale.",
+            "label": "Événements à venir",
+            "description": "Programmation des lives à venir : townhalls, conférences métiers, lancements produits, webinaires et autres temps forts du Groupe CA.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
         {
-            "label": "Replays à la Demande",
-            "description": "Bibliothèque de replays pour revoir à tout moment les communications clés, conférences internes et modules de formation passés.",
+            "label": "Replays",
+            "description": "Accès à la vidéothèque des événements passés, en replay : lives internes, formations, prises de parole stratégiques, etc.",
+            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
+        },
+        {
+            "label": "Conférences & Forums",
+            "description": "Captations ou extraits des grands événements internes ou externes du Groupe, incluant participations à des salons ou forums sectoriels.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         }
     ]
 }
 
-
 # Credentials
-# Set up Kaltura credentials based on the selected KMC
-if KMC == "CA":
+# Set up Kaltura credentials based on the selected KMS
+if KMS == "CA":
     USER_SECRET = os.getenv("ca_user_secret")
     ADMIN_SECRET = os.getenv("ca_admin_secret")
     PARTNER_ID = os.getenv("ca_partner_id")
 else:
-    print(f"❌ Error: Unknown KMC '{KMC}'. Please check your configuration.")
+    print(f"❌ Error: Unknown KMS '{KMS}'. Please check your configuration.")
     exit()
 
 OWNER = "nicolas.deville@kaltura.com"
@@ -160,7 +173,7 @@ print(f"Max videos to upload:\t{max_videos_to_upload}")
 print(f"Upload order:\t\t{start_with}")
 print(f"Generate new thumbnails\t{'Yes' if new_thumbnail else 'No, use existing when available'}")
 print(f"Target languages:\t{', '.join(target_languages)}")
-print(f"KMC:\t\t\t{KMC}")
+print(f"KMS:\t\t\t{KMS}")
 print(f"PPTX path:\t\t{pptx_path}")
 print(f"PPTX theme:\t\t{theme_for_pptx_generation}")
 print(f"# of presentations:\t{num_presentations}")
@@ -171,13 +184,10 @@ for category, channels in CHANNELS.items():
     print(f"  {category:30}{len(channels)} channels")
 
 print("\nCredentials:")
-print(f"USER_SECRET: {USER_SECRET}")
-print(f"ADMIN_SECRET: {ADMIN_SECRET}")
 print(f"Partner ID: {PARTNER_ID}")
 print(f"Owner: {OWNER}")
 print("User and Admin secrets: Configured")
 print("===========================\n")
-
 
 # IMPORTS
 

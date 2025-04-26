@@ -37,12 +37,13 @@ from KalturaClient.Plugins.Caption import KalturaLanguage, KalturaCaptionAsset, 
 
 
 
-def upload_video_to_kaltura(file_path, title=None, description=None, caption_files=None, thumbnail_file_path=None, channel_id=None, USER_SECRET=None, ADMIN_SECRET=None, PARTNER_ID=None, timeout=120): 
+def upload_video_to_kaltura(file_path, title=None, description=None, caption_files=None, thumbnail_file_path=None, channel_id=None, USER_SECRET=None, ADMIN_SECRET=None, PARTNER_ID=None, timeout=300): 
 
     # Kaltura service configuration
     config = KalturaConfiguration(PARTNER_ID)
     config.serviceUrl = "https://www.kaltura.com/"
-    config.requestTimeout = timeout  # Increase timeout to 120 seconds
+    config.requestTimeout = timeout  # Increase timeout to 5 minutes
+    config.connectionTimeout = timeout  # Add connection timeout
     client = KalturaClient(config)
     
     # Load the Caption plugin with correct capitalization

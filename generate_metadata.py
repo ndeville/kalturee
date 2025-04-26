@@ -140,9 +140,10 @@ def get_transcript(video_path):
 
 # TITLE
 
-llm_model_for_title_generation = "cognitivetech/obook_title"
+# llm_model_for_title_generation = "cognitivetech/obook_title"
+llm_model_for_title_generation = "gemma3"
 
-def generate_title(video_path, title_source: str = "filename"): # title_source: "filename" or "transcript" or "json" or "channel_name"
+def generate_title(video_path, title_source: str = "filename", source_language: str = "EN"): # title_source: "filename" or "transcript" or "json" or "channel_name"
     """
     250330-1300: currently generates clean title from filename as attempts to generate from transcript were not working for free with Ollama (only with paid-for GPT-4).
     TODO:
@@ -151,12 +152,15 @@ def generate_title(video_path, title_source: str = "filename"): # title_source: 
     - mechanism to decide which logic to use between "from_json" and "from_transcript" and "from_filename"
     """
     global llm_model_for_title_generation
+
     max_title_length = 200
 
     system_prompt = f"""
 You are a helpful assistant tasked to come up with the best title for a video, given the transcript of a video.
 It is critical that your output is maximum {max_title_length} characters long.
 Make sure that 'Mayo Clinic' is NOT in your output.
+Make sure that the title is in {source_language}.
+ONLY output the title in {source_language}, nothing else.
         """
 
     if title_source == "filename":
@@ -219,9 +223,10 @@ Make it intriguing and likely to attract viewers.
 
 # ✅ DESCRIPTION
 
-llm_model_for_description = "llama3.2"
+llm_model_for_description = "gemma3"
+# llm_model_for_description = "llama3.3"
 
-def generate_description(video_path):
+def generate_description(video_path, based_on="filename", source_language="EN"): # based_on: "transcript" or "filename"
     """
     250330-1311: currently generates clean description from transcript.
     TODO:
@@ -229,18 +234,19 @@ def generate_description(video_path):
     - mechanism to decide which logic to use between "from_json" and "from_transcript"
     """
     global llm_model_for_description
-
-    # print(f"\n>>> Generating description for {video_path}")
     
-    transcript = get_transcript(video_path)
+    if based_on == "transcript":
+        transcript = get_transcript(video_path)
 
-    if transcript:
+        if transcript:
 
-        # Generate the description with OLLAMA
-        result = ollama.generate(llm_model_for_description, f"""
+            print(f"\n>>> Generating description for {video_path} from transcript.")
+
+            # Generate the description with OLLAMA
+            result = ollama.generate(llm_model_for_description, f"""
 
 The content provided below between the <transcript> tags is a transcript of a video.
-Generate a description, in English, for this video. 
+Generate a description, in {source_language}, for this video. 
 DO NOT include 'Mayo Clinic' in the description.
 DO NOT output anything else than the description.
 DO NOT share your reasoning.
@@ -248,6 +254,11 @@ DO NOT mention "the transcript discusses.." or similar. Write the description of
 DO NOT start or end the description with quotes.
 DO NOT format your output with markdown.
 OUTPUT ONLY THE DESCRIPTION, which will be displayed as is in the video portal.
+Make sure that the output does not have any Markdown formatting.
+Make sure that the output is in {source_language}.
+ONLY output the description, nothing else.
+DO NOT provide a transcript, but just a summary.
+Keep it short and concise - ideally around 500 characters.
 
 <transcript>
 {transcript}
@@ -257,6 +268,23 @@ Make sure that the output does not have any Markdown formatting.
 
     """, stream=False)  # Add stream=False to ensure complete response
         
+    elif based_on == "filename":
+
+        file_name = os.path.basename(video_path)
+
+        result = ollama.generate(llm_model_for_description, f"""
+Come up with a description of 500 characters or less, in {source_language}, for a video with the filename {file_name}.
+DO NOT output anything else than the description.
+DO NOT share your reasoning.
+DO NOT start or end the description with quotes.
+DO NOT format your output with markdown.
+OUTPUT ONLY THE DESCRIPTION, which will be displayed as is in the video portal.
+Make sure that the output does not have any Markdown formatting.
+Make sure that the output is in {source_language}.
+ONLY output the description, nothing else.
+    """, stream=False)  # Add stream=False to ensure complete response
+
+
         # The description - ensure we get the full response
         if hasattr(result, 'response'):
             video_description = result.response.strip()
@@ -291,22 +319,24 @@ Make sure that the output does not have any Markdown formatting.
 
 # ✅ TAGS
 
-llm_model_for_tags_generation = "cognitivetech/obook_title"
+# llm_model_for_tags_generation = "cognitivetech/obook_title"
+llm_model_for_tags_generation = "gemma3"
 
-def generate_tags(video_path):
+def generate_tags(video_path, based_on="filename", source_language="EN"): # based_on: "transcript" or "filename"
     """Generate tags for a video based on the video's content."""
 
     print(f"\n>>> Generating tags for {video_path}")
     
-    transcript = get_transcript(video_path)
+    if based_on == "transcript":
+        transcript = get_transcript(video_path)
 
-    if transcript:
+        if transcript:
 
-        # Generate the tags with OLLAMA
-        result = ollama.generate(llm_model_for_tags_generation, f"""
+            # Generate the tags with OLLAMA
+            result = ollama.generate(llm_model_for_tags_generation, f"""
 
 The content provided below between the <transcript> tags is a transcript of a video.
-Generate multiple tags, in English, for this video.
+Generate multiple tags, in {source_language}, for this video.
 Each tag should be two words maximum, but ideally one word.
 Separate tags with commas.
 Maximum 5 tags.
@@ -315,32 +345,52 @@ DO NOT include 'Mayo Clinic' in the tags.
 DO NOT output anything else than the tags.
 DO NOT share your reasoning.
 Make sure the tags are relevant and concise.
+Make sure the tags are in {source_language}.
 
 <transcript>
 {transcript}
 </transcript>
 
     """)
+            
+    elif based_on == "filename":
 
-        # The tags 
-        video_tags = '\n'.join(line.strip() for line in result.response.splitlines())
+        file_name = os.path.basename(video_path)
 
-        print(video_tags)
+        # Generate the tags
+        result = ollama.generate(llm_model_for_tags_generation, f"""
+Come up with 3 tags, in {source_language}, for a video with the filename {file_name}.
+Each tag should be two words maximum, but ideally one word.
+Separate tags with commas.
+Maximum 5 tags.
+Tags can be both what type of video it is and what it's about.
+DO NOT include 'Mayo Clinic' in the tags.
+DO NOT output anything else than the tags.
+DO NOT share your reasoning.
+Make sure the tags are relevant and concise.
+Make sure the tags are in {source_language}.
+    """, stream=False)  # Add stream=False to ensure complete response
 
-        # Create a _tags.txt file and write the video tags into it
-        tags_file_path = video_path.rsplit(".", 1)[0] + "_tags.txt"
-        
-        try:
-            with open(tags_file_path, 'w', encoding='utf-8') as tags_file:
-                tags_file.write(video_tags)
-            print(f"✅ Tags saved to: {tags_file_path}")
-        except Exception as e:
-            print(f"  ❌ Error saving tags to file: {str(e)}")
 
-        return video_tags
+
+    # The tags 
+    video_tags = '\n'.join(line.strip() for line in result.response.splitlines())
+
+    print(video_tags)
+
+    # Create a _tags.txt file and write the video tags into it
+    tags_file_path = video_path.rsplit(".", 1)[0] + "_tags.txt"
     
-    else:
-        return False
+    try:
+        with open(tags_file_path, 'w', encoding='utf-8') as tags_file:
+            tags_file.write(video_tags)
+        print(f"✅ Tags saved to: {tags_file_path}")
+    except Exception as e:
+        print(f"  ❌ Error saving tags to file: {str(e)}")
+
+    return video_tags
+
+
 
 
 

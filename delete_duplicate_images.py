@@ -46,6 +46,8 @@ def perceptual_hash(image_path):
 def delete_duplicate_images(folder_path, threshold=5):
     seen_hashes = {}
     folder = Path(folder_path)
+    files_deleted = 0
+    files_kept = 0
 
     for ext in ('*.jpg', '*.jpeg', '*.png'):
         for image_path in folder.rglob(ext):
@@ -57,17 +59,24 @@ def delete_duplicate_images(folder_path, threshold=5):
             for existing_hash in seen_hashes:
                 if abs(img_hash - existing_hash) <= threshold:
                     os.remove(image_path)
+                    files_deleted += 1
                     duplicate_found = True
                     break
 
             if not duplicate_found:
                 seen_hashes[img_hash] = image_path
+                files_kept += 1
+    print(f"\nDuplicate image removal complete:")
+    print(f"- {files_deleted} duplicate files deleted")
+    print(f"- {files_kept} unique files kept")
+    
+    return files_deleted, files_kept
 
 
 
 if __name__ == "__main__":
 
-    # folder_path = input("\nEnter the folder path: ")
-    folder_path = "/Users/nic/demo/test"
+    folder_path = input("\nEnter the folder path: ")
+    # folder_path = "/Users/nic/demo/test"
 
     delete_duplicate_images(folder_path)
