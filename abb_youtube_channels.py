@@ -18,8 +18,12 @@ pp = pprint.PrettyPrinter(indent=4)
 import sqlite3
 import yt_dlp
 
+from DB.tools import select_all_records, update_record, create_record, delete_record
+
+
 # GLOBALS
 verbose = 1
+test = False
 
 def format_duration(seconds):
     """
@@ -219,32 +223,32 @@ def get_youtube_channel_videos(channel_url, limit=None):
         traceback.print_exc()
         return []
 
-def format_duration(seconds):
-    """
-    Format duration in seconds to a readable time string (HH:MM:SS)
+# def format_duration(seconds):
+#     """
+#     Format duration in seconds to a readable time string (HH:MM:SS)
     
-    Args:
-        seconds (int or float): Duration in seconds
+#     Args:
+#         seconds (int or float): Duration in seconds
         
-    Returns:
-        str: Formatted duration string
-    """
-    if not seconds:
-        return "Unknown"
+#     Returns:
+#         str: Formatted duration string
+#     """
+#     if not seconds:
+#         return "Unknown"
     
-    # Convert to integer to handle float values
-    try:
-        seconds_int = int(seconds)
-        hours = seconds_int // 3600
-        minutes = (seconds_int % 3600) // 60
-        seconds = seconds_int % 60
+#     # Convert to integer to handle float values
+#     try:
+#         seconds_int = int(seconds)
+#         hours = seconds_int // 3600
+#         minutes = (seconds_int % 3600) // 60
+#         seconds = seconds_int % 60
         
-        if hours > 0:
-            return f"{hours}:{minutes:02d}:{seconds:02d}"
-        else:
-            return f"{minutes}:{seconds:02d}"
-    except (TypeError, ValueError):
-        return "Unknown"
+#         if hours > 0:
+#             return f"{hours}:{minutes:02d}:{seconds:02d}"
+#         else:
+#             return f"{minutes}:{seconds:02d}"
+#     except (TypeError, ValueError):
+#         return "Unknown"
 
 
 
@@ -254,7 +258,7 @@ def format_duration(seconds):
 if __name__ == '__main__':
     
     # youtube_channel_url = input("\nEnter the YouTube channel URL: ")
-    youtube_channel_url = "https://www.youtube.com/@abb"  # Replace with your desired YouTube channel
+    youtube_channel_url = "https://www.youtube.com/@ABBCustomerWorld"  # Replace with your desired YouTube channel
     
     # Run first both long processes, for a clean output/print at the end
     stats = get_channel_stats(youtube_channel_url)
@@ -291,11 +295,13 @@ if __name__ == '__main__':
         # Sort videos by duration (longest first)
         videos_sorted = sorted(videos, key=lambda x: x.get('duration', 0) or 0, reverse=True)
         
-        # Filter videos longer than 10 minutes (600 seconds)
-        long_videos = [video for video in videos_sorted if video.get('duration', 0) and video['duration'] > videos_longer_than * 60]
+        # # Filter videos longer than 10 minutes (600 seconds)
+        # long_videos = [video for video in videos_sorted if video.get('duration', 0) and video['duration'] > videos_longer_than * 60]
         
-        print(f"\nFound {len(long_videos)} videos longer than {videos_longer_than} minutes in the channel, out of a total of {stats['total_videos']:,} videos (sorted below by length):\n")
-        for i, video in enumerate(long_videos, 1):
+        # print(f"\nFound {len(long_videos)} videos longer than {videos_longer_than} minutes in the channel, out of a total of {stats['total_videos']:,} videos (sorted below by length):\n")
+
+        for i, video in enumerate(videos_sorted, 1):
+            print(f"\n{video}")
             # Format date if available
             formatted_date = "Unknown"
             if video['upload_date']:
@@ -303,8 +309,34 @@ if __name__ == '__main__':
                 formatted_date = f"{date[:4]}-{date[4:6]}-{date[6:8]}" if len(date) >= 8 else "Unknown"
             
             # Format view count
-            view_count = f"{video['view_count']:,}" if video['view_count'] else "Unknown"
+            # view_count = f"{video['view_count']:,}" if video['view_count'] else "Unknown"
+            view_count = int(video['view_count'])
             
             # Print all information on a single line, starting with duration
-            print(f"{video['duration_string']} | #{i}: {video['title']} | URL: {video['url']}")
+            # print(f"{video['duration_string']} | #{i}: {video['title']} | URL: {video['url']}")
+
+            create_object = {
+                'url': video['url'],
+                'title': video['title'],
+                'summary': video['description'],
+                # 'file_size': video['duration_string'],
+                # 'size_bytes': int(video['duration']),
+                'source': youtube_channel_url,
+                'duration': video['duration'],
+                'duration_string': video['duration_string'],
+                'youtube_id': video['id'],
+                'view_count': view_count,
+                'created': f"{datetime.now().strftime('%Y-%m-%d %H:%M')}"
+            }
+
+            if not test:
+                create_record("/Users/nic/db/scrapee.db",
+                    'abb_library',
+                    create_object
+                )   
+
+            else:
+                print(f"\n{create_object}\n")  
+
+print(f"\n\n✅ Finished in {time.time() - start_time:.2f} seconds\n\n")
 

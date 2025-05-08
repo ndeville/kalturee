@@ -151,6 +151,8 @@ def generate_ppt_thumbnail(background_image_path, theme, output_path=None):
     background_image = background_image.convert('RGB')
     background_image.save(output_path)
 
+    print(f"\n✅ Thumbnail saved to: {output_path}\n")
+
     # # Get and print image dimensions and file size
     # with Image.open(output_path) as img:
     #     width, height = img.size
@@ -166,20 +168,107 @@ def generate_ppt_thumbnail(background_image_path, theme, output_path=None):
 
 
 
+# PDF THUMBNAIL
+
+
+def generate_pdf_thumbnail(pdf_path, output_path=None):
+    """Generate a 16:9 thumbnail from the first page of a PDF with transparent background."""
+    try:
+        # Set default output path if none provided
+        if output_path is None:
+            output_path = os.path.splitext(pdf_path)[0] + ".png"
+        
+        # Use PyMuPDF (fitz) for better image quality
+        import fitz
+        doc = fitz.open(pdf_path)
+        first_page = doc[0]
+        
+        # Create a pixmap with 16:9 aspect ratio
+        target_width = 1280  # HD width
+        target_height = 720  # HD height (16:9 ratio)
+        
+        # Render the page to a pixmap
+        pix = first_page.get_pixmap(matrix=fitz.Matrix(2, 2))
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        
+        # Create a blank 16:9 canvas with transparent background
+        thumbnail = Image.new("RGBA", (target_width, target_height), (0, 0, 0, 0))
+        
+        # Resize the PDF image maintaining aspect ratio to fit within the 16:9 canvas
+        img_ratio = img.width / img.height
+        target_ratio = target_width / target_height
+        
+        if img_ratio > target_ratio:
+            # Image is wider than 16:9
+            new_width = target_width
+            new_height = int(new_width / img_ratio)
+        else:
+            # Image is taller than 16:9
+            new_height = target_height
+            new_width = int(new_height * img_ratio)
+            
+        img_resized = img.resize((new_width, new_height), Image.LANCZOS)
+        
+        # Center the image on the canvas
+        paste_x = (target_width - new_width) // 2
+        paste_y = (target_height - new_height) // 2
+        thumbnail.paste(img_resized, (paste_x, paste_y))
+        
+        # Save the thumbnail as PNG to preserve transparency
+        thumbnail.save(output_path, "PNG")
+
+        print(f"\n✅ Thumbnail saved to: {output_path}\n")
+        
+        return output_path
+    
+    except Exception as e:
+        print(f"Error generating PDF thumbnail: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+def generate_thumbnails_for_folder(folder_path):
+    """
+    Generate thumbnails for all PDF files in a folder that don't already have a corresponding JPG.
+    
+    Args:
+        folder_path (str): Path to the folder containing PDF files
+        
+    Returns:
+        int: Number of thumbnails generated
+    """
+    if not os.path.exists(folder_path):
+        print(f"Error: Folder '{folder_path}' does not exist.")
+        return 0
+        
+    pdf_files = [f for f in os.listdir(folder_path) if f.lower().endswith('.pdf')]
+    
+    if not pdf_files:
+        print(f"No PDF files found in '{folder_path}'.")
+        return 0
+        
+    count = 0
+    for pdf_file in pdf_files:
+        pdf_path = os.path.join(folder_path, pdf_file)
+        jpg_path = os.path.splitext(pdf_path)[0] + '.jpg'
+        
+        # Check if JPG already exists
+        if not os.path.exists(jpg_path):
+            print(f"Generating thumbnail for {pdf_file}...")
+            result = generate_pdf_thumbnail(pdf_path)
+            if result:
+                count += 1
+                print(f"✅ Created thumbnail: {os.path.basename(jpg_path)}")
+            else:
+                print(f"❌ Failed to create thumbnail for {pdf_file}")
+        else:
+            print(f"Skipping {pdf_file} - thumbnail already exists")
+            
+    print(f"\nCompleted: Generated {count} new thumbnails out of {len(pdf_files)} PDF files.")
+    return count
 
 
 
@@ -189,4 +278,6 @@ def generate_ppt_thumbnail(background_image_path, theme, output_path=None):
 
 if __name__ == "__main__":
 
-    extract_best_thumbnail("/Users/nic/dl/yt/test/test.mp4")
+    # extract_best_thumbnail("/Users/nic/dl/yt/test/test.mp4")
+    # generate_pdf_thumbnail("/Users/nic/Dropbox/Kaltura/events/reuters_pharma/250425 How Video can Transform HCP Engagement_Reuters AI Takeaways.pdf")
+    generate_thumbnails_for_folder("/Users/nic/Dropbox/Kaltura/nic-mediaspace/pdfs/")

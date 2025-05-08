@@ -141,11 +141,6 @@ CHANNELS = {
             "description": "Accès à la vidéothèque des événements passés, en replay : lives internes, formations, prises de parole stratégiques, etc.",
             "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
         },
-        {
-            "label": "Conférences & Forums",
-            "description": "Captations ou extraits des grands événements internes ou externes du Groupe, incluant participations à des salons ou forums sectoriels.",
-            "image": "https://assets.mediaspace.kaltura.com/5.149.11.755/public/build0/img/addNew/playlist.svg"
-        }
     ]
 }
 
@@ -243,54 +238,54 @@ count = 0
 count_video_uploaded = 0
 
 
-# # CREATE MISSING CHANNELS IN KMS
+# CREATE MISSING CHANNELS IN KMS
 
-# from kaltura_list_categories import list_kaltura_categories
-# from kaltura_create_channels import create_multiple_categories
+from kaltura_list_categories import list_kaltura_categories
+from kaltura_create_channels import create_multiple_categories
 
-# print("\n\n⚙️  Checking for missing channels in KMS...")
+print("\n\n⚙️  Checking for missing channels in KMS...")
 
-# # Get existing categories/channels from Kaltura
-# existing_categories = list_kaltura_categories(show="kms_only", USER_SECRET=USER_SECRET, ADMIN_SECRET=ADMIN_SECRET, PARTNER_ID=PARTNER_ID)
+# Get existing categories/channels from Kaltura
+existing_categories = list_kaltura_categories(show="kms_only", USER_SECRET=USER_SECRET, ADMIN_SECRET=ADMIN_SECRET, PARTNER_ID=PARTNER_ID)
 
-# # Create a dictionary of existing category names for easy lookup
-# existing_category_names = {category.name: category.id for category in existing_categories}
+# Create a dictionary of existing category names for easy lookup
+existing_category_names = {category.name: category.id for category in existing_categories}
 
-# # Prepare list of channels to create
-# channels_to_create = []
+# Prepare list of channels to create
+channels_to_create = []
 
-# # Check each channel in the CHANNELS dictionary
-# for main_channel, sub_channels in CHANNELS.items():
-#     # Check if main channel exists
-#     if main_channel not in existing_category_names:
-#         print(f"  ➕ Main channel '{main_channel}' needs to be created")
-#         channels_to_create.append({
-#             "name": main_channel,
-#             "description": generate_channel_description(main_channel) if callable(generate_channel_description) else ""
-#         })
+# Check each channel in the CHANNELS dictionary
+for main_channel, sub_channels in CHANNELS.items():
+    # Check if main channel exists
+    if main_channel not in existing_category_names:
+        print(f"  ➕ Main channel '{main_channel}' needs to be created")
+        channels_to_create.append({
+            "name": main_channel,
+            "description": generate_channel_description(main_channel) if callable(generate_channel_description) else ""
+        })
     
-#     # Check sub-channels
-#     for sub_channel in sub_channels:
-#         if sub_channel["label"] not in existing_category_names:
-#             print(f"  ➕ Sub-channel '{sub_channel['label']}' needs to be created")
-#             channels_to_create.append({
-#                 "name": sub_channel["label"],
-#                 "description": sub_channel.get("description", "")
-#             })
+    # Check sub-channels
+    for sub_channel in sub_channels:
+        if sub_channel["label"] not in existing_category_names:
+            print(f"  ➕ Sub-channel '{sub_channel['label']}' needs to be created")
+            channels_to_create.append({
+                "name": sub_channel["label"],
+                "description": sub_channel.get("description", "")
+            })
 
-# # Create missing channels if any
-# if channels_to_create:
-#     print(f"\n⚙️  Creating {len(channels_to_create)} missing channels...")
-#     created, failed = create_multiple_categories(channels_to_create)
-#     print(f"  ✅ Successfully created {len(created)} channels")
-#     if failed:
-#         print(f"  ❌ Failed to create {len(failed)} channels: {', '.join(failed)}")
-# else:
-#     print("  ✅ All channels already exist in KMS")
+# Create missing channels if any
+if channels_to_create:
+    print(f"\n⚙️  Creating {len(channels_to_create)} missing channels...")
+    created, failed = create_multiple_categories(channels_to_create)
+    print(f"  ✅ Successfully created {len(created)} channels")
+    if failed:
+        print(f"  ❌ Failed to create {len(failed)} channels: {', '.join(failed)}")
+else:
+    print("  ✅ All channels already exist in KMS")
 
-# # Get updated list of channels after creation
-# all_channels = {category.name: category.id for category in list_kaltura_categories(show="kms_only", USER_SECRET=USER_SECRET, ADMIN_SECRET=ADMIN_SECRET, PARTNER_ID=PARTNER_ID)}
-# print(f"\n⚙️  Total channels available in KMS: {len(all_channels)}")
+# Get updated list of channels after creation
+all_channels = {category.name: category.id for category in list_kaltura_categories(show="kms_only", USER_SECRET=USER_SECRET, ADMIN_SECRET=ADMIN_SECRET, PARTNER_ID=PARTNER_ID)}
+print(f"\n⚙️  Total channels available in KMS: {len(all_channels)}")
 
 
 
