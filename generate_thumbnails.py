@@ -280,4 +280,5 @@ if __name__ == "__main__":
 
     # extract_best_thumbnail("/Users/nic/dl/yt/test/test.mp4")
     # generate_pdf_thumbnail("/Users/nic/Dropbox/Kaltura/events/reuters_pharma/250425 How Video can Transform HCP Engagement_Reuters AI Takeaways.pdf")
-    generate_thumbnails_for_folder("/Users/nic/Dropbox/Kaltura/nic-mediaspace/pdfs/")
+    # generate_thumbnails_for_folder("/Users/nic/Dropbox/Kaltura/nic-mediaspace/pdfs/")
+    generate_pdf_thumbnail("/Users/nic/Dropbox/Kaltura/platform/Kaltura AI - security principles.pdf")
