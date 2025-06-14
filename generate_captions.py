@@ -25,7 +25,7 @@ import json
 
 
 
-def generate_en_srt(mp4_path):
+def generate_en_srt(mp4_path, language=None):
     """
     250329-1756 FINAL SOLUTION:
     - generate only a .json output with word-level timestamps from whisperx
@@ -40,7 +40,7 @@ def generate_en_srt(mp4_path):
     
     # WhisperX Configuration
     
-    # LANGUAGE = "en"
+    # LANGUAGE = "EN"
     VERBOSE = "False"
     MODEL = "turbo"
     MODEL_CACHE_ONLY = "False"
@@ -84,51 +84,70 @@ def generate_en_srt(mp4_path):
     OUTPUT_FORMAT = "json" # "all" or "json" or "srt" / Output json-only and do post-processing to create a new .srt file with a more reasonable number of words per segment. Or output all formats to get also the clean .txt and delete unneeded files in post-processing.
     PRINT_PROGRESS = "False"
     
-    cmd = [
-        "whisperx",
-        mp4_path,
-        "--verbose", VERBOSE,
-        "--model", MODEL,
-        "--device", DEVICE,
-        "--device_index", DEVICE_INDEX,
-        # "--align_model", ALIGN_MODEL, # 250329-1534 removing to try to fix the overlapping segments issue
-        "--batch_size", BATCH_SIZE,
-        "--compute_type", COMPUTE_TYPE,
-        "--max_line_width", MAX_LINE_WIDTH,
-        "--max_line_count", MAX_LINE_COUNT,
-        # "--language", LANGUAGE,
-        "--task", TASK,
-        # "--interpolate_method", INTERPOLATE_METHOD, # 250329-1534 removing to try to fix the overlapping segments issue
-        # "--no_align", NO_ALIGN,
-        # "--return_char_alignments", RETURN_CHAR_ALIGNMENTS,
-        # "--vad_method", VAD_METHOD, # 250329-1534 removing to try to fix the overlapping segments issue
-        # "--vad_onset", VAD_ONSET, # 250329-1534 removing to try to fix the overlapping segments issue
-        # "--vad_offset", VAD_OFFSET, # 250329-1534 removing to try to fix the overlapping segments issue
-        # "--chunk_size", CHUNK_SIZE, # 250329-1534 removing to try to fix the overlapping segments issue
-        # "--diarize", DIARIZE,
-        # "--min_speakers", MIN_SPEAKERS,
-        # "--max_speakers", MAX_SPEAKERS,
-        # "--temperature", TEMPERATURE,
-        # "--best_of", BEST_OF,
-        # "--beam_size", BEAM_SIZE,
-        # "--patience", PATIENCE,
-        # "--length_penalty", LENGTH_PENALTY,
-        # "--suppress_tokens", SUPPRESS_TOKENS,
-        # "--initial_prompt", INITIAL_PROMPT,
-        # "--condition_on_previous_text", CONDITION_ON_PREVIOUS_TEXT,
-        # "--fp16", FP16,
-        # "--temperature_increment_on_fallback", TEMPERATURE_INCREMENT_ON_FALLBACK,
-        # "--compression_ratio_threshold", COMPRESSION_RATIO_THRESHOLD,
-        # "--logprob_threshold", LOGPROB_THRESHOLD,
-        # "--no_speech_threshold", NO_SPEECH_THRESHOLD,
-        # "--highlight_words", HIGHLIGHT_WORDS,
-        # "--segment_resolution", SEGMENT_RESOLUTION,
-        # "--threads", THREADS,
-        # "--hf_token", HF_TOKEN,
-        # "--print_progress", PRINT_PROGRESS,
-        "--output_dir", output_dir,
-        "--output_format", OUTPUT_FORMAT
-    ]
+
+    if language is None:
+        cmd = [
+            "whisperx",
+            mp4_path,
+            "--verbose", VERBOSE,
+            "--model", MODEL,
+            "--device", DEVICE,
+            "--device_index", DEVICE_INDEX,
+            # "--align_model", ALIGN_MODEL, # 250329-1534 removing to try to fix the overlapping segments issue
+            "--batch_size", BATCH_SIZE,
+            "--compute_type", COMPUTE_TYPE,
+            "--max_line_width", MAX_LINE_WIDTH,
+            "--max_line_count", MAX_LINE_COUNT,
+            # "--language", LANGUAGE,
+            "--task", TASK,
+            # "--interpolate_method", INTERPOLATE_METHOD, # 250329-1534 removing to try to fix the overlapping segments issue
+            # "--no_align", NO_ALIGN,
+            # "--return_char_alignments", RETURN_CHAR_ALIGNMENTS,
+            # "--vad_method", VAD_METHOD, # 250329-1534 removing to try to fix the overlapping segments issue
+            # "--vad_onset", VAD_ONSET, # 250329-1534 removing to try to fix the overlapping segments issue
+            # "--vad_offset", VAD_OFFSET, # 250329-1534 removing to try to fix the overlapping segments issue
+            # "--chunk_size", CHUNK_SIZE, # 250329-1534 removing to try to fix the overlapping segments issue
+            # "--diarize", DIARIZE,
+            # "--min_speakers", MIN_SPEAKERS,
+            # "--max_speakers", MAX_SPEAKERS,
+            # "--temperature", TEMPERATURE,
+            # "--best_of", BEST_OF,
+            # "--beam_size", BEAM_SIZE,
+            # "--patience", PATIENCE,
+            # "--length_penalty", LENGTH_PENALTY,
+            # "--suppress_tokens", SUPPRESS_TOKENS,
+            # "--initial_prompt", INITIAL_PROMPT,
+            # "--condition_on_previous_text", CONDITION_ON_PREVIOUS_TEXT,
+            # "--fp16", FP16,
+            # "--temperature_increment_on_fallback", TEMPERATURE_INCREMENT_ON_FALLBACK,
+            # "--compression_ratio_threshold", COMPRESSION_RATIO_THRESHOLD,
+            # "--logprob_threshold", LOGPROB_THRESHOLD,
+            # "--no_speech_threshold", NO_SPEECH_THRESHOLD,
+            # "--highlight_words", HIGHLIGHT_WORDS,
+            # "--segment_resolution", SEGMENT_RESOLUTION,
+            # "--threads", THREADS,
+            # "--hf_token", HF_TOKEN,
+            # "--print_progress", PRINT_PROGRESS,
+            "--output_dir", output_dir,
+            "--output_format", OUTPUT_FORMAT
+        ]
+    else:
+        cmd = [
+            "whisperx",
+            mp4_path,
+            "--verbose", VERBOSE,
+            "--model", MODEL,
+            "--device", DEVICE,
+            "--device_index", DEVICE_INDEX,
+            "--batch_size", BATCH_SIZE,
+            "--compute_type", COMPUTE_TYPE,
+            "--max_line_width", MAX_LINE_WIDTH,
+            "--max_line_count", MAX_LINE_COUNT,
+            "--language", language,
+            "--task", TASK,
+            "--output_dir", output_dir,
+            "--output_format", OUTPUT_FORMAT
+        ]
 
     # Add boolean flags without values
     # if MODEL_CACHE_ONLY.lower() == "true":
@@ -198,7 +217,10 @@ def generate_en_srt(mp4_path):
 
 
     # Create a clean .txt version of the SRT file
-    txt_path = os.path.join(output_dir, f"{base_name}.txt")
+    if language is None:
+        txt_path = os.path.join(output_dir, f"{base_name}.txt")
+    else:
+        txt_path = os.path.join(output_dir, f"{base_name}_{language}.txt")
     
     try:
         with open(srt_path, "r") as srt_file, open(txt_path, "w") as txt_file:
@@ -240,6 +262,9 @@ def generate_en_srt(mp4_path):
             print(f"❌ Error deleting VTT file: {str(e)}")
 
     return srt_path
+
+
+
 
 
 
