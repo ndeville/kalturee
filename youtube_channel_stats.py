@@ -254,7 +254,7 @@ def format_duration(seconds):
 if __name__ == '__main__':
     
     # youtube_channel_url = input("\nEnter the YouTube channel URL: ")
-    youtube_channel_url = "https://www.youtube.com/@abb"  # Replace with your desired YouTube channel
+    youtube_channel_url = "https://www.youtube.com/@henkel"  # Replace with your desired YouTube channel
     
     # Run first both long processes, for a clean output/print at the end
     stats = get_channel_stats(youtube_channel_url)

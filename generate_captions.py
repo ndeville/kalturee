@@ -237,6 +237,15 @@ def generate_en_srt(mp4_path, language=None):
                 f.write(content.rstrip("\n"))
         
         print(f"\n✅ Generated clean TXT file: {txt_path}")
+
+        # Copy txt_path to clipboard
+        try:
+            process = subprocess.Popen("pbcopy", universal_newlines=True, stdin=subprocess.PIPE)
+            process.communicate(txt_path)
+            print(f"\nℹ️  Copied TXT path to clipboard: {txt_path}")
+        except Exception as e:
+            print(f"❌ Error copying to clipboard: {str(e)}")
+        
     except Exception as e:
         print(f"❌ Error creating TXT file: {str(e)}")
 
@@ -285,13 +294,13 @@ if __name__ == "__main__":
     # test_file = "/Users/nic/vid/250327-102136.mp4"
     # test_file = "/Users/nic/vid/250312-163225.mp4"
     # test_file = "/Users/nic/vid/250325-150148.mp4"
-    test_file = "/Users/nic/Dropbox/Kaltura/clients/linde/demo/linde_ceo_fireside.mp4"
+    # test_file = "/Users/nic/Dropbox/Kaltura/clients/linde/demo/linde_ceo_fireside.mp4"
 
-    print(f"\n🔊 Generating 🇬🇧 English SRT for: {test_file}\n")
+    # print(f"\n🔊 Generating 🇬🇧 English SRT for: {test_file}\n")
 
     # generate_srt(test_file, source_lang="EN", output_lang="EN", model_name="large-v2")
 
-    generate_en_srt(test_file)
+    generate_en_srt("/Users/nic/Dropbox/Kaltura/events/intranet_reloaded/250701-intranet-reloaded-ubisoft.mp3", language="fr")
 
     # End Chrono
     run_time = round((time.time() - start_time), 3)
