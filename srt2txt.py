@@ -34,4 +34,4 @@ def srt_to_txt(src_path: str, dst_path: str | None = None) -> None:
     print(f"Wrote {dst}")
 
 
-srt_to_txt("/Users/nic/Downloads/250522 English_ABB_DE_Webinar.srt")
+srt_to_txt("/Users/nic/test/test.srt")

@@ -287,20 +287,13 @@ if __name__ == "__main__":
     start_time = time.time()
     import os
 
-    # test_file = "/Users/nic/dl/yt/pharma-demo/Mayo Clinic Q&A podcast： A vaccine milestone.mp4"
     # test_file = "/Users/nic/dl/yt/test/test.mp4"
-    # test_file = "/Users/nic/vid/250328-154450.mp4"
-    # test_file = "/Users/nic/vid/250312-163723.mp4"
-    # test_file = "/Users/nic/vid/250327-102136.mp4"
-    # test_file = "/Users/nic/vid/250312-163225.mp4"
-    # test_file = "/Users/nic/vid/250325-150148.mp4"
-    # test_file = "/Users/nic/Dropbox/Kaltura/clients/linde/demo/linde_ceo_fireside.mp4"
 
     # print(f"\n🔊 Generating 🇬🇧 English SRT for: {test_file}\n")
 
     # generate_srt(test_file, source_lang="EN", output_lang="EN", model_name="large-v2")
 
-    generate_en_srt("/Users/nic/Dropbox/Kaltura/events/intranet_reloaded/250701-intranet-reloaded-ubisoft.mp3", language="fr")
+    generate_en_srt("/path/to/your/audio.mp3", language="fr")
 
     # End Chrono
     run_time = round((time.time() - start_time), 3)

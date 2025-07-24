@@ -182,9 +182,6 @@ def process_youtube_url_to_download(youtube_url=None):
 
 if __name__ == '__main__':
 
-    # youtube_url = "https://www.youtube.com/watch?v=pYsv9hxGo_0"
-    # youtube_url = "https://www.youtube.com/@GlencoreVideos"
-    # youtube_url = "https://www.youtube.com/playlist?list=PL-Q2v2azALUPW9j2mfKc3posK7tIcwqHe" # ABB ?
     youtube_url = "https://www.youtube.com/watch?v=7zT17jK5qLU&list=PLSWR1ylG_6JYl612AZJ_hA0N0y5EgOp_y"
 
     process_youtube_url_to_download(youtube_url)

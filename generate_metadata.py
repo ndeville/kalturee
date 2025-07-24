@@ -402,12 +402,7 @@ if __name__ == "__main__":
     start_time = time.time()
     import os
 
-    # test_file = "/Users/nic/dl/yt/test/test.mp4"
-    test_file = "/Users/nic/dl/yt/pharma-demo/Mayo Clinic Q&A podcast： January bringing an omicron surge.mp4"
-    # test_file = "/Users/nic/dl/yt/pharma-demo/Mayo Clinic Q&A podcast： Justin's journey and silver linings.mp4"
-    print(f"\n\nTESTING with {test_file}")
-    # print(f"\ntitle:\t{generate_title(test_file)}\n")
-    # print(f"  description:\t{generate_description(test_file)}")
+    test_file = "/Users/nic/dl/yt/test/test.mp4"
     print(f"  tags:\t\t{generate_tags(test_file)}")
 
     # End Chrono

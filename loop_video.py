@@ -63,7 +63,7 @@ def loop_video_to_duration(input_path, output_path, target_duration_hrs=1):
     # final_clip.write_videofile(output_path, codec='libx264', preset='ultrafast', ffmpeg_params=['-crf', '0'], audio_codec='pcm_s16le') # lossless but 89GB for 1hr
 
 # Example usage
-input_path = '/Users/nic/Movies/Recordings/250227-1001-glencore.mp4'
+input_path = '/Users/nic/test/test.mp4'
 output_path = f"{input_path[:-4]}_LONG.mp4"
 loop_video_to_duration(input_path, output_path)
 

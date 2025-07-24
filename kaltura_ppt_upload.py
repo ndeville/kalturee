@@ -366,11 +366,7 @@ if __name__ == "__main__":
         exit()
 
 
-    # file_path = "/Users/nic/Downloads/temp/test-ppt-upload.pptx"
     file_path = "/Users/nic/test/test.pptx"
-    # file_path = "/Users/nic/Dropbox/Kaltura/clients/ubisoft/250714 Kaltura for Ubisoft.pptx"
-    file_path = "/Users/nic/Dropbox/Kaltura/presentations/_Kaltura Master_share_light.pptx"
-    # channel_id = 374884072
     channel_id = 324250232  # My KMS "unlisted" channel ID = 324250232
 
     print(f"\n\nUploading {file_path} to Kaltura with custom title, description, and a custom thumbnail...")

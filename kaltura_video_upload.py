@@ -219,8 +219,7 @@ if __name__ == "__main__":
 
 
 
-    # file_path = "/Users/nic/Downloads/temp/test_video.mp4"
-    file_path = "/Users/nic/dl/yt/pharma-demo/cancer-symposium_A Time for Questions with Dr. Q.mp4"
+    file_path = "/Users/nic/Downloads/temp/test_video.mp4"
     thumbnail_file_path = "/Users/nic/Downloads/temp/thumbnail2.jpg"
     caption_files = {
         # "English": "/Users/nic/Downloads/temp/en.vtt",
