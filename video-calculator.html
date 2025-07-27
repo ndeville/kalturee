@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaltura Video Storage & Bandwidth Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group .unit {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .resolutions-section {
+            margin-top: 25px;
+        }
+
+        .resolutions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .resolution-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .resolution-item:hover {
+            border-color: #667eea;
+        }
+
+        .resolution-item input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .resolution-item label {
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .resolution-item .bitrate {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .summary-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        .year-header {
+            background: #667eea !important;
+            color: white !important;
+            font-weight: bold;
+        }
+
+        .year-total {
+            background: #e3f2fd;
+            font-weight: 600;
+        }
+
+        .resolution-breakdown {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .resolution-breakdown h4 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .breakdown-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .breakdown-item .label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .breakdown-item .value {
+            font-size: 1.1rem;
+            color: #667eea;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 8px;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 300px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -150px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .resolutions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 6px;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Kaltura Video Storage & Bandwidth Calculator</h1>
+            <p>Estimate storage and bandwidth requirements for video streaming over 5 years</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <h2>📊 Input Parameters</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="initialStorage">Initial Storage (GB)</label>
+                        <input type="number" id="initialStorage" value="0" min="0" step="0.01">
+                        <div class="unit">Existing storage already in use</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="monthlyUploads">Monthly Upload Volume (# videos)</label>
+                        <input type="number" id="monthlyUploads" value="20" min="0">
+                        <div class="unit">Number of new videos uploaded each month</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="avgDuration">Average Video Duration (minutes)</label>
+                        <input type="number" id="avgDuration" value="20" min="0" step="0.1">
+                        <div class="unit">Per video</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="avgBitrate">Average Bitrate (kbps)</label>
+                        <input type="number" id="avgBitrate" value="2500" min="1">
+                        <div class="unit">Entered in kilobits per second</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="avgViews">Total Views per Month</label>
+                        <input type="number" id="avgViews" value="1000" min="0">
+                        <div class="unit">Total views across all videos per month</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="watchPercentage">Avg % watched per view</label>
+                        <input type="number" id="watchPercentage" value="100" min="0" max="100" step="1">
+                        <div class="unit">Allows partial views; 100% = full length</div>
+                    </div>
+                </div>
+
+                <div class="resolutions-section">
+                    <h3>🎬 Video Resolutions & Transcoding</h3>
+                    <div class="resolutions-grid">
+                        <div class="resolution-item">
+                            <input type="checkbox" id="source" checked>
+                            <label for="source">Source</label>
+                            <span class="bitrate">Original file</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="uhd_ott">
+                            <label for="uhd_ott">UHD/4K – OTT (H265)</label>
+                            <span class="bitrate">25000 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="uhd_web" checked>
+                            <label for="uhd_web">UHD/4K – WEB (H264)</label>
+                            <span class="bitrate">12000 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="hd_1080" checked>
+                            <label for="hd_1080">HD/1080 – WEB (H264)</label>
+                            <span class="bitrate">4000 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="hd_720" checked>
+                            <label for="hd_720">HD/720 – WEB (H264)</label>
+                            <span class="bitrate">2500 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="sd_large" checked>
+                            <label for="sd_large">SD/Large – WEB/MBR (H264)</label>
+                            <span class="bitrate">1500 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="sd_small" checked>
+                            <label for="sd_small">SD/Small – WEB/MBR (H264)</label>
+                            <span class="bitrate">900 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="basic_large" checked>
+                            <label for="basic_large">Basic/Small – WEB/MBR (H264)</label>
+                            <span class="bitrate">600 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="basic_medium" checked>
+                            <label for="basic_medium">Basic/Small – WEB/MBR (H264)</label>
+                            <span class="bitrate">400 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="basic_small">
+                            <label for="basic_small">Basic/Small – MBR (H264)</label>
+                            <span class="bitrate">200 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="basic_tiny">
+                            <label for="basic_tiny">Basic/Small – MBR (H264)</label>
+                            <span class="bitrate">100 kbps</span>
+                        </div>
+                        <div class="resolution-item">
+                            <input type="checkbox" id="audio_only">
+                            <label for="audio_only">Audio Only – MBR (H264)</label>
+                            <span class="bitrate">64 kbps</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="calculate()">🚀 Calculate</button>
+                    <button class="btn btn-secondary" onclick="resetForm()">🔄 Reset</button>
+                    <button class="btn btn-success" onclick="downloadCSV()">📊 Download CSV</button>
+                    <button class="btn btn-info" onclick="downloadImage()">🖼️ Download Image</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Calculating results...</p>
+            </div>
+
+            <div class="results-section" id="results" style="display: none;">
+                <h2>📈 Results</h2>
+                
+                <div class="summary-cards" id="summaryCards">
+                    <!-- Summary cards will be populated here -->
+                </div>
+
+                <div class="table-container">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Starting Storage (GB)</th>
+                                <th>New Videos</th>
+                                <th>Added Storage Month (GB)</th>
+                                <th>Total Storage (GB)</th>
+                                <th>Views This Month</th>
+                                <th>Bandwidth This Month (GB)</th>
+                                <th>Total Bandwidth (GB)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="resolution-breakdown" id="resolutionBreakdown">
+                    <!-- Resolution breakdown will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const STORAGE_REDUNDANCY_FACTOR = 1.5; // 50% redundancy
+        const BANDWIDTH_OVERHEAD_FACTOR = 1.1; // 10% overhead
+        const MONTHS_TO_CALCULATE = 60; // 5 years
+
+        // Resolution configurations
+        const resolutions = {
+            source: { name: "Source", bitrate: null, multiplier: 1.0 },
+            uhd_ott: { name: "UHD/4K – OTT (H265)", bitrate: 25000, multiplier: 0.7 },
+            uhd_web: { name: "UHD/4K – WEB (H264)", bitrate: 12000, multiplier: 1.0 },
+            hd_1080: { name: "HD/1080 – WEB (H264)", bitrate: 4000, multiplier: 1.0 },
+            hd_720: { name: "HD/720 – WEB (H264)", bitrate: 2500, multiplier: 1.0 },
+            sd_large: { name: "SD/Large – WEB/MBR (H264)", bitrate: 1500, multiplier: 1.0 },
+            sd_small: { name: "SD/Small – WEB/MBR (H264)", bitrate: 900, multiplier: 1.0 },
+            basic_large: { name: "Basic/Small – WEB/MBR (H264)", bitrate: 600, multiplier: 1.0 },
+            basic_medium: { name: "Basic/Small – WEB/MBR (H264)", bitrate: 400, multiplier: 1.0 },
+            basic_small: { name: "Basic/Small – MBR (H264)", bitrate: 200, multiplier: 1.0 },
+            basic_tiny: { name: "Basic/Small – MBR (H264)", bitrate: 100, multiplier: 1.0 },
+            audio_only: { name: "Audio Only – MBR (H264)", bitrate: 64, multiplier: 1.0 }
+        };
+
+        // Utility functions
+        function formatNumber(num) {
+            return Math.ceil(num).toLocaleString();
+        }
+
+        function formatGB(num) {
+            return Math.ceil(num * 100) / 100;
+        }
+
+        function validateInputs() {
+            const errors = [];
+            
+            const initialStorage = parseFloat(document.getElementById('initialStorage').value);
+            const monthlyUploads = parseInt(document.getElementById('monthlyUploads').value);
+            const avgDuration = parseFloat(document.getElementById('avgDuration').value);
+            const avgBitrate = parseInt(document.getElementById('avgBitrate').value);
+            const avgViews = parseInt(document.getElementById('avgViews').value);
+            const watchPercentage = parseFloat(document.getElementById('watchPercentage').value);
+
+            if (initialStorage < 0) errors.push("Initial storage must be ≥ 0");
+            if (monthlyUploads < 0) errors.push("Monthly uploads must be ≥ 0");
+            if (avgDuration < 0) errors.push("Average duration must be ≥ 0");
+            if (avgBitrate <= 0) errors.push("Average bitrate must be > 0");
+            if (avgViews < 0) errors.push("Average views must be ≥ 0");
+            if (watchPercentage < 0 || watchPercentage > 100) errors.push("Watch percentage must be between 0 and 100");
+
+            // Check if at least one resolution is selected
+            const selectedResolutions = Object.keys(resolutions).filter(key => 
+                document.getElementById(key).checked
+            );
+            if (selectedResolutions.length === 0) {
+                errors.push("At least one resolution must be selected");
+            }
+
+            return errors;
+        }
+
+        function getSelectedResolutions() {
+            return Object.keys(resolutions).filter(key => 
+                document.getElementById(key).checked
+            );
+        }
+
+        function calculateVideoSize(durationMinutes, bitrateKbps) {
+            // Convert to bytes: (duration * 60 seconds) * (bitrate / 8 bits per byte)
+            const sizeBytes = (durationMinutes * 60) * (bitrateKbps / 8);
+            // Convert to GB
+            return sizeBytes / (1024 * 1024 * 1024);
+        }
+
+        function calculate() {
+            const errors = validateInputs();
+            if (errors.length > 0) {
+                alert("Please fix the following errors:\n" + errors.join("\n"));
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            // Use setTimeout to allow UI to update
+            setTimeout(() => {
+                performCalculation();
+            }, 100);
+        }
+
+        function performCalculation() {
+            // Get input values
+            const initialStorage = parseFloat(document.getElementById('initialStorage').value);
+            const monthlyUploads = parseInt(document.getElementById('monthlyUploads').value);
+            const avgDuration = parseFloat(document.getElementById('avgDuration').value);
+            const avgBitrate = parseInt(document.getElementById('avgBitrate').value);
+            const avgViews = parseInt(document.getElementById('avgViews').value);
+            const watchPercentage = parseFloat(document.getElementById('watchPercentage').value) / 100;
+
+            const selectedResolutions = getSelectedResolutions();
+
+            // Calculate base video size in GB
+            const baseVideoSizeGB = calculateVideoSize(avgDuration, avgBitrate);
+
+            // Calculate transcoding multipliers
+            let totalTranscodeMultiplier = 0;
+            const resolutionDetails = {};
+
+            selectedResolutions.forEach(resKey => {
+                const resolution = resolutions[resKey];
+                if (resolution.bitrate) {
+                    const transcodeSize = calculateVideoSize(avgDuration, resolution.bitrate);
+                    const multiplier = transcodeSize / baseVideoSizeGB;
+                    totalTranscodeMultiplier += multiplier * resolution.multiplier;
+                    resolutionDetails[resKey] = {
+                        name: resolution.name,
+                        size: transcodeSize,
+                        multiplier: multiplier
+                    };
+                } else {
+                    // Source file
+                    totalTranscodeMultiplier += 1.0;
+                    resolutionDetails[resKey] = {
+                        name: resolution.name,
+                        size: baseVideoSizeGB,
+                        multiplier: 1.0
+                    };
+                }
+            });
+
+            // Initialize results
+            const results = [];
+            let cumulativeStorage = initialStorage;
+            let yearBandwidth = 0; // Reset each year
+            let yearTotals = {};
+
+            for (let month = 1; month <= MONTHS_TO_CALCULATE; month++) {
+                const year = Math.ceil(month / 12);
+                
+                // Reset bandwidth at the start of each year
+                if (month === 1 || (month - 1) % 12 === 0) {
+                    yearBandwidth = 0;
+                }
+                
+                // Calculate monthly values
+                const newVideos = monthlyUploads;
+                const monthlyRawSize = newVideos * baseVideoSizeGB;
+                const monthlyTranscodeSize = monthlyRawSize * totalTranscodeMultiplier;
+                const monthlyStorage = monthlyTranscodeSize * STORAGE_REDUNDANCY_FACTOR;
+                
+                const monthlyViews = avgViews; // Total views per month across all videos
+                const bandwidthPerView = baseVideoSizeGB * watchPercentage * totalTranscodeMultiplier;
+                const monthlyBandwidth = monthlyViews * bandwidthPerView * BANDWIDTH_OVERHEAD_FACTOR;
+
+                // Update cumulative totals
+                cumulativeStorage += monthlyStorage;
+                yearBandwidth += monthlyBandwidth;
+
+                // Store year totals
+                if (!yearTotals[year]) {
+                    yearTotals[year] = {
+                        storage: 0,
+                        bandwidth: 0,
+                        videos: 0,
+                        views: 0
+                    };
+                }
+                yearTotals[year].storage += monthlyStorage;
+                yearTotals[year].bandwidth += monthlyBandwidth;
+                yearTotals[year].videos += newVideos;
+                yearTotals[year].views += monthlyViews;
+
+                results.push({
+                    month,
+                    year,
+                    startingStorage: cumulativeStorage - monthlyStorage,
+                    newVideos,
+                    storageEndOfMonth: monthlyStorage,
+                    totalStorage: cumulativeStorage,
+                    viewsThisMonth: monthlyViews,
+                    bandwidthThisMonth: monthlyBandwidth,
+                    totalBandwidth: yearBandwidth
+                });
+            }
+
+            displayResults(results, yearTotals, resolutionDetails);
+            
+            // Hide loading
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function displayResults(results, yearTotals, resolutionDetails) {
+            const tbody = document.getElementById('resultsBody');
+            tbody.innerHTML = '';
+
+            let currentYear = 0;
+            let yearStorageTotal = 0;
+            let yearBandwidthTotal = 0;
+
+            results.forEach((row, index) => {
+                // Add year header if new year
+                if (row.year !== currentYear) {
+                    if (currentYear > 0) {
+                        // Add year total row
+                        const yearTotalRow = tbody.insertRow();
+                        yearTotalRow.className = 'year-total';
+                        yearTotalRow.innerHTML = `
+                            <td><strong>Year ${currentYear} Total</strong></td>
+                            <td>-</td>
+                            <td><strong>${formatNumber(yearTotals[currentYear].videos)}</strong></td>
+                            <td><strong>${formatGB(yearTotals[currentYear].storage)}</strong></td>
+                            <td><strong>${formatGB(yearTotals[currentYear].storage)}</strong></td>
+                            <td><strong>${formatNumber(yearTotals[currentYear].views)}</strong></td>
+                            <td><strong>${formatGB(yearTotals[currentYear].bandwidth)}</strong></td>
+                            <td><strong>${formatGB(yearTotals[currentYear].bandwidth)}</strong></td>
+                        `;
+                    }
+
+                    // Add year header
+                    const yearHeaderRow = tbody.insertRow();
+                    yearHeaderRow.className = 'year-header';
+                    yearHeaderRow.innerHTML = `
+                        <td colspan="8"><strong>Year ${row.year}</strong></td>
+                    `;
+
+                    currentYear = row.year;
+                    yearStorageTotal = 0;
+                    yearBandwidthTotal = 0;
+                }
+
+                // Add data row
+                const dataRow = tbody.insertRow();
+                dataRow.innerHTML = `
+                    <td>${row.month}</td>
+                    <td>${formatGB(row.startingStorage)}</td>
+                    <td>${formatNumber(row.newVideos)}</td>
+                    <td>${formatGB(row.storageEndOfMonth)}</td>
+                    <td><strong>${formatGB(row.totalStorage)}</strong></td>
+                    <td>${formatNumber(row.viewsThisMonth)}</td>
+                    <td>${formatGB(row.bandwidthThisMonth)}</td>
+                    <td><strong>${formatGB(row.totalBandwidth)}</strong></td>
+                `;
+            });
+
+            // Add final year total
+            if (currentYear > 0) {
+                const yearTotalRow = tbody.insertRow();
+                yearTotalRow.className = 'year-total';
+                yearTotalRow.innerHTML = `
+                    <td><strong>Year ${currentYear} Total</strong></td>
+                    <td>-</td>
+                    <td><strong>${formatNumber(yearTotals[currentYear].videos)}</strong></td>
+                    <td><strong>${formatGB(yearTotals[currentYear].storage)}</strong></td>
+                    <td><strong>${formatGB(yearTotals[currentYear].storage)}</strong></td>
+                    <td><strong>${formatNumber(yearTotals[currentYear].views)}</strong></td>
+                    <td><strong>${formatGB(yearTotals[currentYear].bandwidth)}</strong></td>
+                    <td><strong>${formatGB(yearTotals[currentYear].bandwidth)}</strong></td>
+                `;
+            }
+
+            // Display summary cards
+            displaySummaryCards(results, yearTotals);
+
+            // Display resolution breakdown
+            displayResolutionBreakdown(resolutionDetails);
+
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function displaySummaryCards(results, yearTotals) {
+            const lastRow = results[results.length - 1];
+            const totalVideos = results.reduce((sum, row) => sum + row.newVideos, 0);
+            const totalViews = results.reduce((sum, row) => sum + row.viewsThisMonth, 0);
+            
+            // Calculate total bandwidth across all years
+            const totalBandwidth = Object.values(yearTotals).reduce((sum, yearData) => sum + yearData.bandwidth, 0);
+
+            const summaryCards = document.getElementById('summaryCards');
+            summaryCards.innerHTML = `
+                <div class="summary-card">
+                    <h3>5-Year Total Storage</h3>
+                    <div class="value">${formatGB(lastRow.totalStorage)} GB</div>
+                </div>
+                <div class="summary-card">
+                    <h3>5-Year Total Bandwidth</h3>
+                    <div class="value">${formatGB(totalBandwidth)} GB</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Videos</h3>
+                    <div class="value">${formatNumber(totalVideos)}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Views</h3>
+                    <div class="value">${formatNumber(totalViews)}</div>
+                </div>
+            `;
+        }
+
+        function displayResolutionBreakdown(resolutionDetails) {
+            const breakdown = document.getElementById('resolutionBreakdown');
+            let html = '<h4>📊 Resolution Breakdown</h4><div class="breakdown-grid">';
+            
+            Object.entries(resolutionDetails).forEach(([key, detail]) => {
+                html += `
+                    <div class="breakdown-item">
+                        <div class="label">${detail.name}</div>
+                        <div class="value">${formatGB(detail.size)} GB per video</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            breakdown.innerHTML = html;
+        }
+
+        function resetForm() {
+            document.getElementById('initialStorage').value = '0';
+            document.getElementById('monthlyUploads').value = '20';
+            document.getElementById('avgDuration').value = '20';
+            document.getElementById('avgBitrate').value = '2500';
+            document.getElementById('avgViews').value = '1000';
+            document.getElementById('watchPercentage').value = '100';
+
+            // Reset checkboxes to defaults
+            document.getElementById('source').checked = true;
+            document.getElementById('uhd_ott').checked = false;
+            document.getElementById('uhd_web').checked = true;
+            document.getElementById('hd_1080').checked = true;
+            document.getElementById('hd_720').checked = true;
+            document.getElementById('sd_large').checked = true;
+            document.getElementById('sd_small').checked = true;
+            document.getElementById('basic_large').checked = true;
+            document.getElementById('basic_medium').checked = true;
+            document.getElementById('basic_small').checked = false;
+            document.getElementById('basic_tiny').checked = false;
+            document.getElementById('audio_only').checked = false;
+
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function downloadCSV() {
+            const table = document.getElementById('resultsTable');
+            const rows = table.querySelectorAll('tr');
+            let csv = [];
+
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td, th');
+                const rowData = [];
+                cols.forEach(col => {
+                    rowData.push('"' + col.textContent.replace(/"/g, '""') + '"');
+                });
+                csv.push(rowData.join(','));
+            });
+
+            const csvContent = csv.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'kaltura_storage_calculator_results.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadImage() {
+            // This is a simplified version - in a real implementation, you'd use html2canvas or similar
+            alert('Image download feature would require additional libraries. For now, please use your browser\'s screenshot functionality or the CSV export.');
+        }
+
+        // Auto-calculate on input changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('change', calculate);
+            });
+
+            // Initial calculation
+            calculate();
+        });
+    </script>
+</body>
+</html>
