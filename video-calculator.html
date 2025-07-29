@@ -1,4 +1,15 @@
 <!DOCTYPE html>
+<!--
+All form inputs can be passed via URL parameters:
+initialStorage - Initial Storage (GB)
+monthlyUploads - Monthly Uploads (# videos) 
+avgDuration - Average Duration (minutes)
+avgBitrate - Average Bitrate (kbps)
+avgViews - Average Views per month
+watchPercentage - Watch Percentage (%)
+pricePerGB - Price per GB ($)
+source, uhd_web, hd_1080, hd_720, sd_large, sd_small, basic_large, basic_medium, basic_small, basic_tiny, audio_only - Resolution checkboxes (1 = checked, 0 = unchecked)
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -227,6 +238,19 @@
             font-weight: bold;
         }
 
+        .tables-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .table-section h3 {
+            margin-bottom: 15px;
+            color: #495057;
+            font-size: 1.2rem;
+        }
+
         .table-container {
             overflow-x: auto;
             background: white;
@@ -318,7 +342,7 @@
             width: 300px;
             background-color: #333;
             color: white;
-            text-align: center;
+            text-align: left;
             border-radius: 6px;
             padding: 10px;
             position: absolute;
@@ -374,6 +398,11 @@
                 grid-template-columns: 1fr;
             }
 
+            .tables-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
             table {
                 font-size: 12px;
             }
@@ -404,6 +433,102 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .collapsible-section {
+            margin-top: 25px;
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid #e9ecef;
+        }
+
+        .collapsible-header:hover {
+            background: #dee2e6;
+        }
+
+        .collapsible-header h3 {
+            margin: 0;
+            color: #495057;
+            font-size: 1.2rem;
+        }
+
+        .collapsible-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+            color: #6c757d;
+        }
+
+        .collapsible-header.collapsed .collapsible-icon {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+            padding: 20px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            padding: 0 20px;
+        }
+
+        .combined-totals-container {
+            margin: 20px 0;
+        }
+
+        .combined-total-row {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            color: #2d5a2d;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -420,13 +545,13 @@
                 <div class="input-grid">
                     <div class="input-group">
                         <label for="initialStorage">Initial Storage (GB)</label>
-                        <input type="number" id="initialStorage" value="0" min="0" step="0.01">
+                        <input type="number" id="initialStorage" value="100" min="0" step="1">
                         <div class="unit">Existing storage already in use</div>
                     </div>
 
                     <div class="input-group">
                         <label for="monthlyUploads">Monthly Upload Volume (# videos)</label>
-                        <input type="number" id="monthlyUploads" value="20" min="0">
+                        <input type="number" id="monthlyUploads" value="50" min="0">
                         <div class="unit">Number of new videos uploaded each month</div>
                     </div>
 
@@ -439,7 +564,18 @@
                     <div class="input-group">
                         <label for="avgBitrate">Average Bitrate (kbps)</label>
                         <input type="number" id="avgBitrate" value="2500" min="1">
-                        <div class="unit">Entered in kilobits per second</div>
+                        <div class="unit">Entered in kilobits per second <span class="tooltip">ⓘ
+                            <span class="tooltiptext">
+                                <strong>Bitrate</strong> determines video quality and file size.<br><br>
+                                <strong>Typical rates:</strong><br>
+                                • 500-1000 kbps: Low quality (mobile)<br>
+                                • 1000-2500 kbps: Standard definition<br>
+                                • 2500-5000 kbps: High definition (720p)<br>
+                                • 5000-8000 kbps: Full HD (1080p)<br>
+                                • 8000-15000 kbps: 4K/UHD<br><br>
+                                <strong>2500 kbps</strong> is good for 720p HD video.
+                            </span>
+                        </span></div>
                     </div>
 
                     <div class="input-group">
@@ -453,70 +589,82 @@
                         <input type="number" id="watchPercentage" value="100" min="0" max="100" step="1">
                         <div class="unit">Allows partial views; 100% = full length</div>
                     </div>
+
+                    <div class="input-group">
+                        <label for="pricePerGB">Price per GB ($)</label>
+                        <input type="number" id="pricePerGB" value="0.5" min="0" step="0.01">
+                        <div class="unit">Storage and bandwidth cost per GB</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="includedStorage">Included Bandwidth & Storage (TB)</label>
+                        <input type="number" id="includedStorage" value="30" min="0" step="1">
+                        <div class="unit">Free tier allowance before costs apply</div>
+                    </div>
                 </div>
 
-                <div class="resolutions-section">
-                    <h3>🎬 Video Resolutions & Transcoding</h3>
-                    <div class="resolutions-grid">
-                        <div class="resolution-item">
-                            <input type="checkbox" id="source" checked>
-                            <label for="source">Source</label>
-                            <span class="bitrate">Original file</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="uhd_ott">
-                            <label for="uhd_ott">UHD/4K – OTT (H265)</label>
-                            <span class="bitrate">25000 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="uhd_web" checked>
-                            <label for="uhd_web">UHD/4K – WEB (H264)</label>
-                            <span class="bitrate">12000 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="hd_1080" checked>
-                            <label for="hd_1080">HD/1080 – WEB (H264)</label>
-                            <span class="bitrate">4000 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="hd_720" checked>
-                            <label for="hd_720">HD/720 – WEB (H264)</label>
-                            <span class="bitrate">2500 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="sd_large" checked>
-                            <label for="sd_large">SD/Large – WEB/MBR (H264)</label>
-                            <span class="bitrate">1500 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="sd_small" checked>
-                            <label for="sd_small">SD/Small – WEB/MBR (H264)</label>
-                            <span class="bitrate">900 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="basic_large" checked>
-                            <label for="basic_large">Basic/Small – WEB/MBR (H264)</label>
-                            <span class="bitrate">600 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="basic_medium" checked>
-                            <label for="basic_medium">Basic/Small – WEB/MBR (H264)</label>
-                            <span class="bitrate">400 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="basic_small">
-                            <label for="basic_small">Basic/Small – MBR (H264)</label>
-                            <span class="bitrate">200 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="basic_tiny">
-                            <label for="basic_tiny">Basic/Small – MBR (H264)</label>
-                            <span class="bitrate">100 kbps</span>
-                        </div>
-                        <div class="resolution-item">
-                            <input type="checkbox" id="audio_only">
-                            <label for="audio_only">Audio Only – MBR (H264)</label>
-                            <span class="bitrate">64 kbps</span>
+                <div class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleResolutions()">
+                        <h3>🎬 Video Resolutions & Transcoding</h3>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content" id="resolutionsContent">
+                        <div class="resolutions-grid">
+                            <div class="resolution-item">
+                                <input type="checkbox" id="source" checked>
+                                <label for="source">Source</label>
+                                <span class="bitrate">Original file</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="uhd_web">
+                                <label for="uhd_web">UHD/4K – WEB (H264)</label>
+                                <span class="bitrate">12000 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="hd_1080" checked>
+                                <label for="hd_1080">HD/1080 – WEB (H264)</label>
+                                <span class="bitrate">4000 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="hd_720" checked>
+                                <label for="hd_720">HD/720 – WEB (H264)</label>
+                                <span class="bitrate">2500 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="sd_large" checked>
+                                <label for="sd_large">SD/Large – WEB/MBR (H264)</label>
+                                <span class="bitrate">1500 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="sd_small" checked>
+                                <label for="sd_small">SD/Small – WEB/MBR (H264)</label>
+                                <span class="bitrate">900 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="basic_large" checked>
+                                <label for="basic_large">Basic/Small – WEB/MBR (H264)</label>
+                                <span class="bitrate">600 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="basic_medium" checked>
+                                <label for="basic_medium">Basic/Small – WEB/MBR (H264)</label>
+                                <span class="bitrate">400 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="basic_small">
+                                <label for="basic_small">Basic/Small – MBR (H264)</label>
+                                <span class="bitrate">200 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="basic_tiny">
+                                <label for="basic_tiny">Basic/Small – MBR (H264)</label>
+                                <span class="bitrate">100 kbps</span>
+                            </div>
+                            <div class="resolution-item">
+                                <input type="checkbox" id="audio_only">
+                                <label for="audio_only">Audio Only – MBR (H264)</label>
+                                <span class="bitrate">64 kbps</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -524,8 +672,8 @@
                 <div class="buttons">
                     <button class="btn btn-primary" onclick="calculate()">🚀 Calculate</button>
                     <button class="btn btn-secondary" onclick="resetForm()">🔄 Reset</button>
+                    <button class="btn btn-info" onclick="shareURL()" style="margin-left: auto;">📤 Share</button>
                     <button class="btn btn-success" onclick="downloadCSV()">📊 Download CSV</button>
-                    <button class="btn btn-info" onclick="downloadImage()">🖼️ Download Image</button>
                 </div>
             </div>
 
@@ -541,24 +689,52 @@
                     <!-- Summary cards will be populated here -->
                 </div>
 
-                <div class="table-container">
-                    <table id="resultsTable">
-                        <thead>
-                            <tr>
-                                <th>Month</th>
-                                <th>Starting Storage (GB)</th>
-                                <th>New Videos</th>
-                                <th>Added Storage Month (GB)</th>
-                                <th>Total Storage (GB)</th>
-                                <th>Views This Month</th>
-                                <th>Bandwidth This Month (GB)</th>
-                                <th>Total Bandwidth (GB)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultsBody">
-                            <!-- Results will be populated here -->
-                        </tbody>
-                    </table>
+                <div class="tables-container">
+                    <div class="table-section">
+                        <h3>📦 Storage Analysis</h3>
+                        <div class="table-container">
+                            <table id="storageTable">
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Starting Storage (GB)</th>
+                                        <th>New Videos</th>
+                                        <th>Added Storage Month (GB)</th>
+                                        <th>Total Storage (GB)</th>
+                                        <th>Monthly Storage Cost ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="storageBody">
+                                    <!-- Storage results will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="table-section">
+                        <h3>🌐 Bandwidth Analysis</h3>
+                        <div class="table-container">
+                            <table id="bandwidthTable">
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Views This Month</th>
+                                        <th>Bandwidth This Month (GB)</th>
+                                        <th>Total Bandwidth (GB)</th>
+                                        <th>Monthly Bandwidth Cost ($)</th>
+                                        <th>Total Monthly Cost ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bandwidthBody">
+                                    <!-- Bandwidth results will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="combined-totals-container" id="combinedTotalsContainer">
+                    <!-- Combined total rows will be populated here -->
                 </div>
 
                 <div class="resolution-breakdown" id="resolutionBreakdown">
@@ -568,16 +744,17 @@
         </div>
     </div>
 
+    <!-- Notification container -->
+    <div id="notification" class="notification"></div>
+
     <script>
         // Configuration
-        const STORAGE_REDUNDANCY_FACTOR = 1.5; // 50% redundancy
         const BANDWIDTH_OVERHEAD_FACTOR = 1.1; // 10% overhead
         const MONTHS_TO_CALCULATE = 60; // 5 years
 
         // Resolution configurations
         const resolutions = {
             source: { name: "Source", bitrate: null, multiplier: 1.0 },
-            uhd_ott: { name: "UHD/4K – OTT (H265)", bitrate: 25000, multiplier: 0.7 },
             uhd_web: { name: "UHD/4K – WEB (H264)", bitrate: 12000, multiplier: 1.0 },
             hd_1080: { name: "HD/1080 – WEB (H264)", bitrate: 4000, multiplier: 1.0 },
             hd_720: { name: "HD/720 – WEB (H264)", bitrate: 2500, multiplier: 1.0 },
@@ -596,7 +773,7 @@
         }
 
         function formatGB(num) {
-            return Math.ceil(num * 100) / 100;
+            return Math.ceil(num);
         }
 
         function validateInputs() {
@@ -608,6 +785,8 @@
             const avgBitrate = parseInt(document.getElementById('avgBitrate').value);
             const avgViews = parseInt(document.getElementById('avgViews').value);
             const watchPercentage = parseFloat(document.getElementById('watchPercentage').value);
+            const pricePerGB = parseFloat(document.getElementById('pricePerGB').value);
+            const includedStorage = parseFloat(document.getElementById('includedStorage').value);
 
             if (initialStorage < 0) errors.push("Initial storage must be ≥ 0");
             if (monthlyUploads < 0) errors.push("Monthly uploads must be ≥ 0");
@@ -615,6 +794,8 @@
             if (avgBitrate <= 0) errors.push("Average bitrate must be > 0");
             if (avgViews < 0) errors.push("Average views must be ≥ 0");
             if (watchPercentage < 0 || watchPercentage > 100) errors.push("Watch percentage must be between 0 and 100");
+            if (pricePerGB < 0) errors.push("Price per GB must be ≥ 0");
+            if (includedStorage < 0) errors.push("Included storage must be ≥ 0");
 
             // Check if at least one resolution is selected
             const selectedResolutions = Object.keys(resolutions).filter(key => 
@@ -665,41 +846,44 @@
             const avgBitrate = parseInt(document.getElementById('avgBitrate').value);
             const avgViews = parseInt(document.getElementById('avgViews').value);
             const watchPercentage = parseFloat(document.getElementById('watchPercentage').value) / 100;
+            const pricePerGB = parseFloat(document.getElementById('pricePerGB').value);
+            const includedStorageTB = parseFloat(document.getElementById('includedStorage').value);
+            const includedStorageGB = includedStorageTB * 1024; // Convert TB to GB
 
             const selectedResolutions = getSelectedResolutions();
 
             // Calculate base video size in GB
             const baseVideoSizeGB = calculateVideoSize(avgDuration, avgBitrate);
 
-            // Calculate transcoding multipliers
-            let totalTranscodeMultiplier = 0;
+            // Calculate total storage per video across all selected resolutions
+            let totalStoragePerVideo = 0;
             const resolutionDetails = {};
 
             selectedResolutions.forEach(resKey => {
                 const resolution = resolutions[resKey];
+                let videoSize;
+                
                 if (resolution.bitrate) {
-                    const transcodeSize = calculateVideoSize(avgDuration, resolution.bitrate);
-                    const multiplier = transcodeSize / baseVideoSizeGB;
-                    totalTranscodeMultiplier += multiplier * resolution.multiplier;
-                    resolutionDetails[resKey] = {
-                        name: resolution.name,
-                        size: transcodeSize,
-                        multiplier: multiplier
-                    };
+                    // Use the resolution's bitrate for transcoded versions
+                    videoSize = calculateVideoSize(avgDuration, resolution.bitrate);
                 } else {
-                    // Source file
-                    totalTranscodeMultiplier += 1.0;
-                    resolutionDetails[resKey] = {
-                        name: resolution.name,
-                        size: baseVideoSizeGB,
-                        multiplier: 1.0
-                    };
+                    // Use source bitrate for source file
+                    videoSize = baseVideoSizeGB;
                 }
+                
+                totalStoragePerVideo += videoSize;
+                resolutionDetails[resKey] = {
+                    name: resolution.name,
+                    size: videoSize
+                };
             });
+
+            // Convert initial storage to account for all selected resolutions
+            const initialStorageConverted = initialStorage * totalStoragePerVideo / baseVideoSizeGB;
 
             // Initialize results
             const results = [];
-            let cumulativeStorage = initialStorage;
+            let cumulativeStorage = initialStorageConverted;
             let yearBandwidth = 0; // Reset each year
             let yearTotals = {};
 
@@ -713,13 +897,25 @@
                 
                 // Calculate monthly values
                 const newVideos = monthlyUploads;
-                const monthlyRawSize = newVideos * baseVideoSizeGB;
-                const monthlyTranscodeSize = monthlyRawSize * totalTranscodeMultiplier;
-                const monthlyStorage = monthlyTranscodeSize * STORAGE_REDUNDANCY_FACTOR;
+                const monthlyStorage = newVideos * totalStoragePerVideo;
                 
                 const monthlyViews = avgViews; // Total views per month across all videos
-                const bandwidthPerView = baseVideoSizeGB * watchPercentage * totalTranscodeMultiplier;
+                const bandwidthPerView = baseVideoSizeGB * watchPercentage * (totalStoragePerVideo / baseVideoSizeGB);
                 const monthlyBandwidth = monthlyViews * bandwidthPerView * BANDWIDTH_OVERHEAD_FACTOR;
+
+                // Calculate costs based on total storage at end of month
+                const totalStorageAtEndOfMonth = cumulativeStorage + monthlyStorage;
+                
+                // Calculate costs only for usage exceeding included amount
+                const totalUsageThisMonth = totalStorageAtEndOfMonth + monthlyBandwidth;
+                const excessUsage = Math.max(0, totalUsageThisMonth - includedStorageGB);
+                const monthlyTotalCost = excessUsage * pricePerGB;
+                
+                // Distribute cost proportionally between storage and bandwidth
+                const storageRatio = totalStorageAtEndOfMonth / totalUsageThisMonth;
+                const bandwidthRatio = monthlyBandwidth / totalUsageThisMonth;
+                const monthlyStorageCost = monthlyTotalCost * storageRatio;
+                const monthlyBandwidthCost = monthlyTotalCost * bandwidthRatio;
 
                 // Update cumulative totals
                 cumulativeStorage += monthlyStorage;
@@ -731,13 +927,19 @@
                         storage: 0,
                         bandwidth: 0,
                         videos: 0,
-                        views: 0
+                        views: 0,
+                        cost: 0,
+                        storageCost: 0,
+                        bandwidthCost: 0
                     };
                 }
                 yearTotals[year].storage += monthlyStorage;
                 yearTotals[year].bandwidth += monthlyBandwidth;
                 yearTotals[year].videos += newVideos;
                 yearTotals[year].views += monthlyViews;
+                yearTotals[year].cost += monthlyTotalCost;
+                yearTotals[year].storageCost += monthlyStorageCost;
+                yearTotals[year].bandwidthCost += monthlyBandwidthCost;
 
                 results.push({
                     month,
@@ -748,7 +950,9 @@
                     totalStorage: cumulativeStorage,
                     viewsThisMonth: monthlyViews,
                     bandwidthThisMonth: monthlyBandwidth,
-                    totalBandwidth: yearBandwidth
+                    totalBandwidth: yearBandwidth,
+                    monthlyCost: monthlyTotalCost,
+                    yearlyCost: yearTotals[year].cost
                 });
             }
 
@@ -759,72 +963,135 @@
         }
 
         function displayResults(results, yearTotals, resolutionDetails) {
-            const tbody = document.getElementById('resultsBody');
-            tbody.innerHTML = '';
+            const storageTbody = document.getElementById('storageBody');
+            const bandwidthTbody = document.getElementById('bandwidthBody');
+            const combinedTotalsContainer = document.getElementById('combinedTotalsContainer');
+            const includedStorageTB = parseFloat(document.getElementById('includedStorage').value);
+            const includedStorageGB = includedStorageTB * 1024;
+            storageTbody.innerHTML = '';
+            bandwidthTbody.innerHTML = '';
+            combinedTotalsContainer.innerHTML = '';
 
             let currentYear = 0;
-            let yearStorageTotal = 0;
-            let yearBandwidthTotal = 0;
 
             results.forEach((row, index) => {
                 // Add year header if new year
                 if (row.year !== currentYear) {
                     if (currentYear > 0) {
-                        // Add year total row
-                        const yearTotalRow = tbody.insertRow();
-                        yearTotalRow.className = 'year-total';
-                        yearTotalRow.innerHTML = `
+                        // Add year total rows
+                        const storageYearTotalRow = storageTbody.insertRow();
+                        storageYearTotalRow.className = 'year-total';
+                        storageYearTotalRow.innerHTML = `
                             <td><strong>Year ${currentYear} Total</strong></td>
                             <td>-</td>
                             <td><strong>${formatNumber(yearTotals[currentYear].videos)}</strong></td>
                             <td><strong>${formatGB(yearTotals[currentYear].storage)}</strong></td>
                             <td><strong>${formatGB(yearTotals[currentYear].storage)}</strong></td>
+                            <td><strong>$${formatNumber(yearTotals[currentYear].storageCost)}</strong></td>
+                        `;
+
+                        const bandwidthYearTotalRow = bandwidthTbody.insertRow();
+                        bandwidthYearTotalRow.className = 'year-total';
+                        bandwidthYearTotalRow.innerHTML = `
+                            <td><strong>Year ${currentYear} Total</strong></td>
                             <td><strong>${formatNumber(yearTotals[currentYear].views)}</strong></td>
                             <td><strong>${formatGB(yearTotals[currentYear].bandwidth)}</strong></td>
                             <td><strong>${formatGB(yearTotals[currentYear].bandwidth)}</strong></td>
+                            <td><strong>$${formatNumber(yearTotals[currentYear].bandwidthCost)}</strong></td>
+                            <td><strong>$${formatNumber(yearTotals[currentYear].cost)}</strong></td>
                         `;
+
+                        // Add combined total row that spans the full page width
+                        const combinedTotalDiv = document.createElement('div');
+                        combinedTotalDiv.className = 'combined-total-row';
+                        const yearTotalUsage = yearTotals[currentYear].storage + yearTotals[currentYear].bandwidth;
+                        const excessUsage = Math.max(0, yearTotalUsage - includedStorageGB);
+                        combinedTotalDiv.innerHTML = `
+                            📊 Year ${currentYear} Combined Total: ${formatGB(yearTotalUsage)} GB 
+                            (Storage: ${formatGB(yearTotals[currentYear].storage)} GB + Bandwidth: ${formatGB(yearTotals[currentYear].bandwidth)} GB)
+                            ${excessUsage > 0 ? `| Excess: ${formatGB(excessUsage)} GB` : '| Within included allowance'}
+                        `;
+                        combinedTotalsContainer.appendChild(combinedTotalDiv);
                     }
 
-                    // Add year header
-                    const yearHeaderRow = tbody.insertRow();
-                    yearHeaderRow.className = 'year-header';
-                    yearHeaderRow.innerHTML = `
-                        <td colspan="8"><strong>Year ${row.year}</strong></td>
+                    // Add year headers
+                    const storageYearHeaderRow = storageTbody.insertRow();
+                    storageYearHeaderRow.className = 'year-header';
+                    storageYearHeaderRow.innerHTML = `
+                        <td colspan="6"><strong>Year ${row.year}</strong></td>
+                    `;
+
+                    const bandwidthYearHeaderRow = bandwidthTbody.insertRow();
+                    bandwidthYearHeaderRow.className = 'year-header';
+                    bandwidthYearHeaderRow.innerHTML = `
+                        <td colspan="6"><strong>Year ${row.year}</strong></td>
                     `;
 
                     currentYear = row.year;
-                    yearStorageTotal = 0;
-                    yearBandwidthTotal = 0;
                 }
 
-                // Add data row
-                const dataRow = tbody.insertRow();
-                dataRow.innerHTML = `
+                // Calculate costs
+                const monthlyStorageCost = row.totalStorage * parseFloat(document.getElementById('pricePerGB').value);
+                const monthlyBandwidthCost = row.bandwidthThisMonth * parseFloat(document.getElementById('pricePerGB').value);
+
+                // Add storage data row
+                const storageDataRow = storageTbody.insertRow();
+                storageDataRow.innerHTML = `
                     <td>${row.month}</td>
                     <td>${formatGB(row.startingStorage)}</td>
                     <td>${formatNumber(row.newVideos)}</td>
                     <td>${formatGB(row.storageEndOfMonth)}</td>
                     <td><strong>${formatGB(row.totalStorage)}</strong></td>
+                    <td>$${formatNumber(monthlyStorageCost)}</td>
+                `;
+
+                // Add bandwidth data row
+                const bandwidthDataRow = bandwidthTbody.insertRow();
+                bandwidthDataRow.innerHTML = `
+                    <td>${row.month}</td>
                     <td>${formatNumber(row.viewsThisMonth)}</td>
                     <td>${formatGB(row.bandwidthThisMonth)}</td>
                     <td><strong>${formatGB(row.totalBandwidth)}</strong></td>
+                    <td>$${formatNumber(monthlyBandwidthCost)}</td>
+                    <td>$${formatNumber(row.monthlyCost)}</td>
                 `;
             });
 
             // Add final year total
             if (currentYear > 0) {
-                const yearTotalRow = tbody.insertRow();
-                yearTotalRow.className = 'year-total';
-                yearTotalRow.innerHTML = `
+                const storageYearTotalRow = storageTbody.insertRow();
+                storageYearTotalRow.className = 'year-total';
+                storageYearTotalRow.innerHTML = `
                     <td><strong>Year ${currentYear} Total</strong></td>
                     <td>-</td>
                     <td><strong>${formatNumber(yearTotals[currentYear].videos)}</strong></td>
                     <td><strong>${formatGB(yearTotals[currentYear].storage)}</strong></td>
                     <td><strong>${formatGB(yearTotals[currentYear].storage)}</strong></td>
+                    <td><strong>$${formatNumber(yearTotals[currentYear].storageCost)}</strong></td>
+                `;
+
+                const bandwidthYearTotalRow = bandwidthTbody.insertRow();
+                bandwidthYearTotalRow.className = 'year-total';
+                bandwidthYearTotalRow.innerHTML = `
+                    <td><strong>Year ${currentYear} Total</strong></td>
                     <td><strong>${formatNumber(yearTotals[currentYear].views)}</strong></td>
                     <td><strong>${formatGB(yearTotals[currentYear].bandwidth)}</strong></td>
                     <td><strong>${formatGB(yearTotals[currentYear].bandwidth)}</strong></td>
+                    <td><strong>$${formatNumber(yearTotals[currentYear].bandwidthCost)}</strong></td>
+                    <td><strong>$${formatNumber(yearTotals[currentYear].cost)}</strong></td>
                 `;
+
+                // Add combined total row for final year
+                const combinedTotalDiv = document.createElement('div');
+                combinedTotalDiv.className = 'combined-total-row';
+                const yearTotalUsage = yearTotals[currentYear].storage + yearTotals[currentYear].bandwidth;
+                const excessUsage = Math.max(0, yearTotalUsage - includedStorageGB);
+                combinedTotalDiv.innerHTML = `
+                    📊 Year ${currentYear} Combined Total: ${formatGB(yearTotalUsage)} GB 
+                    (Storage: ${formatGB(yearTotals[currentYear].storage)} GB + Bandwidth: ${formatGB(yearTotals[currentYear].bandwidth)} GB)
+                    ${excessUsage > 0 ? `| Excess: ${formatGB(excessUsage)} GB` : '| Within included allowance'}
+                `;
+                combinedTotalsContainer.appendChild(combinedTotalDiv);
             }
 
             // Display summary cards
@@ -842,8 +1109,12 @@
             const totalVideos = results.reduce((sum, row) => sum + row.newVideos, 0);
             const totalViews = results.reduce((sum, row) => sum + row.viewsThisMonth, 0);
             
-            // Calculate total bandwidth across all years
+            // Calculate total bandwidth and cost across all years
             const totalBandwidth = Object.values(yearTotals).reduce((sum, yearData) => sum + yearData.bandwidth, 0);
+            const totalCost = Object.values(yearTotals).reduce((sum, yearData) => sum + yearData.cost, 0);
+            
+            const includedStorageTB = parseFloat(document.getElementById('includedStorage').value);
+            const includedStorageGB = includedStorageTB * 1024;
 
             const summaryCards = document.getElementById('summaryCards');
             summaryCards.innerHTML = `
@@ -854,6 +1125,14 @@
                 <div class="summary-card">
                     <h3>5-Year Total Bandwidth</h3>
                     <div class="value">${formatGB(totalBandwidth)} GB</div>
+                </div>
+                <div class="summary-card">
+                    <h3>5-Year Total Cost</h3>
+                    <div class="value">$${formatNumber(totalCost)}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Included Storage</h3>
+                    <div class="value">${includedStorageTB} TB</div>
                 </div>
                 <div class="summary-card">
                     <h3>Total Videos</h3>
@@ -870,7 +1149,9 @@
             const breakdown = document.getElementById('resolutionBreakdown');
             let html = '<h4>📊 Resolution Breakdown</h4><div class="breakdown-grid">';
             
+            let totalPerVideo = 0;
             Object.entries(resolutionDetails).forEach(([key, detail]) => {
+                totalPerVideo += detail.size;
                 html += `
                     <div class="breakdown-item">
                         <div class="label">${detail.name}</div>
@@ -878,6 +1159,13 @@
                     </div>
                 `;
             });
+            
+            html += `
+                <div class="breakdown-item" style="border-left-color: #28a745;">
+                    <div class="label">Total Storage per Video</div>
+                    <div class="value">${formatGB(totalPerVideo)} GB</div>
+                </div>
+            `;
             
             html += '</div>';
             breakdown.innerHTML = html;
@@ -890,10 +1178,11 @@
             document.getElementById('avgBitrate').value = '2500';
             document.getElementById('avgViews').value = '1000';
             document.getElementById('watchPercentage').value = '100';
+            document.getElementById('pricePerGB').value = '0.5';
+            document.getElementById('includedStorage').value = '30';
 
             // Reset checkboxes to defaults
             document.getElementById('source').checked = true;
-            document.getElementById('uhd_ott').checked = false;
             document.getElementById('uhd_web').checked = true;
             document.getElementById('hd_1080').checked = true;
             document.getElementById('hd_720').checked = true;
@@ -909,11 +1198,32 @@
         }
 
         function downloadCSV() {
-            const table = document.getElementById('resultsTable');
-            const rows = table.querySelectorAll('tr');
+            const storageTable = document.getElementById('storageTable');
+            const bandwidthTable = document.getElementById('bandwidthTable');
+            
             let csv = [];
-
-            rows.forEach(row => {
+            
+            // Add storage data
+            csv.push(['STORAGE ANALYSIS']);
+            csv.push([]);
+            const storageRows = storageTable.querySelectorAll('tr');
+            storageRows.forEach(row => {
+                const cols = row.querySelectorAll('td, th');
+                const rowData = [];
+                cols.forEach(col => {
+                    rowData.push('"' + col.textContent.replace(/"/g, '""') + '"');
+                });
+                csv.push(rowData.join(','));
+            });
+            
+            csv.push([]);
+            csv.push([]);
+            
+            // Add bandwidth data
+            csv.push(['BANDWIDTH ANALYSIS']);
+            csv.push([]);
+            const bandwidthRows = bandwidthTable.querySelectorAll('tr');
+            bandwidthRows.forEach(row => {
                 const cols = row.querySelectorAll('td, th');
                 const rowData = [];
                 cols.forEach(col => {
@@ -934,13 +1244,167 @@
             document.body.removeChild(link);
         }
 
-        function downloadImage() {
-            // This is a simplified version - in a real implementation, you'd use html2canvas or similar
-            alert('Image download feature would require additional libraries. For now, please use your browser\'s screenshot functionality or the CSV export.');
+
+
+        // URL parameter mapping
+        const urlParamMap = {
+            'initialStorage': 'initialStorage',
+            'monthlyUploads': 'monthlyUploads',
+            'avgDuration': 'avgDuration',
+            'avgBitrate': 'avgBitrate',
+            'avgViews': 'avgViews',
+            'watchPercentage': 'watchPercentage',
+            'pricePerGB': 'p',
+            'includedStorage': 'includedStorage'
+        };
+
+        // Resolution parameter mapping
+        const resolutionParamMap = {
+            'source': 'source',
+            'uhd_web': 'uhd_web',
+            'hd_1080': 'hd_1080',
+            'hd_720': 'hd_720',
+            'sd_large': 'sd_large',
+            'sd_small': 'sd_small',
+            'basic_large': 'basic_large',
+            'basic_medium': 'basic_medium',
+            'basic_small': 'basic_small',
+            'basic_tiny': 'basic_tiny',
+            'audio_only': 'audio_only'
+        };
+
+        // Notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Parse URL parameters and set form values
+        function parseURLParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Parse regular input parameters
+            Object.entries(urlParamMap).forEach(([inputId, paramName]) => {
+                const value = urlParams.get(paramName);
+                if (value !== null) {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.value = parseFloat(value) || input.defaultValue || 0;
+                    }
+                }
+            });
+
+            // Parse resolution checkboxes
+            Object.entries(resolutionParamMap).forEach(([checkboxId, paramName]) => {
+                const value = urlParams.get(paramName);
+                if (value !== null) {
+                    const checkbox = document.getElementById(checkboxId);
+                    if (checkbox) {
+                        checkbox.checked = value === '1' || value === 'true';
+                    }
+                }
+            });
+        }
+
+        // Generate URL with current parameters
+        function generateShareURL() {
+            const url = new URL(window.location.href);
+            const params = new URLSearchParams();
+
+            // Add regular input parameters
+            Object.entries(urlParamMap).forEach(([inputId, paramName]) => {
+                const input = document.getElementById(inputId);
+                if (input && input.value !== '') {
+                    params.set(paramName, input.value);
+                }
+            });
+
+            // Add resolution checkbox parameters
+            Object.entries(resolutionParamMap).forEach(([checkboxId, paramName]) => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox && checkbox.checked) {
+                    params.set(paramName, '1');
+                }
+            });
+
+            // Set the search parameters
+            url.search = params.toString();
+            return url.toString();
+        }
+
+        // Share URL function
+        function shareURL() {
+            const shareURL = generateShareURL();
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                // Use modern clipboard API
+                navigator.clipboard.writeText(shareURL).then(() => {
+                    showNotification('✅ URL copied to clipboard!', 'success');
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(shareURL);
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopyTextToClipboard(shareURL);
+            }
+        }
+
+        // Fallback copy function for older browsers
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showNotification('✅ URL copied to clipboard!', 'success');
+                } else {
+                    showNotification('❌ Failed to copy URL', 'error');
+                }
+            } catch (err) {
+                showNotification('❌ Failed to copy URL', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // Toggle resolutions section
+        function toggleResolutions() {
+            const header = document.querySelector('.collapsible-header');
+            const content = document.getElementById('resolutionsContent');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                header.classList.remove('collapsed');
+            } else {
+                content.classList.add('collapsed');
+                header.classList.add('collapsed');
+            }
         }
 
         // Auto-calculate on input changes
         document.addEventListener('DOMContentLoaded', function() {
+            // Parse URL parameters first
+            parseURLParameters();
+
+            // Start with resolutions section collapsed
+            const header = document.querySelector('.collapsible-header');
+            const content = document.getElementById('resolutionsContent');
+            content.classList.add('collapsed');
+            header.classList.add('collapsed');
+
             const inputs = document.querySelectorAll('input');
             inputs.forEach(input => {
                 input.addEventListener('change', calculate);
